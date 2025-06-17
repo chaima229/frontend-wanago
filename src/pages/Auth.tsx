@@ -11,7 +11,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const { login, register } = useAuth();
   const { toast } = useToast();
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -59,54 +59,68 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
+    <div className="min-h-screen flex">
+      {/* Left side - Restaurant image */}
+      <div 
+        className="hidden lg:flex lg:w-1/2 bg-cover bg-center relative"
+        style={{
+          backgroundImage: `url('/lovable-uploads/fbbe3e93-7295-419b-8f1a-40279c1a5046.png')`
+        }}
+      >
+        <div className="absolute inset-0 bg-black bg-opacity-40"></div>
+        <div className="relative z-10 flex items-start justify-center pt-8">
+          <div className="text-white text-2xl font-bold flex items-center">
+            <span className="text-red-500 mr-1">📍</span>
+            VanGo
+          </div>
+        </div>
+      </div>
+
+      {/* Right side - Form */}
+      <div className="w-full lg:w-1/2 bg-gray-900 flex items-center justify-center p-8">
+        <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">
-              {isLogin ? 'Connexion' : 'Créer un compte'}
+              {isLogin ? 'Log In' : 'Create Account'}
             </h1>
-            <div className="flex items-center justify-center mb-6">
-              <div className="text-2xl font-bold text-purple-400">RestaurantGo</div>
-            </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {!isLogin && (
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nom complet
+                  Full Name
                 </label>
                 <Input
                   type="text"
                   name="fullName"
                   value={formData.fullName}
                   onChange={handleInputChange}
-                  placeholder="Anass Aker"
+                  placeholder="Anass Akker"
                   required={!isLogin}
-                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 h-12"
                 />
               </div>
             )}
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Adresse e-mail
+                E-mail Address
               </label>
               <Input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="anass.aker@email.com"
+                placeholder="anass.akker@vnov.com"
                 required
-                className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 h-12"
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Mot de passe
+                Password
               </label>
               <div className="relative">
                 <Input
@@ -114,9 +128,9 @@ const Auth = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="••••••••"
+                  placeholder="Akan2002"
                   required
-                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 pr-12"
+                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 h-12 pr-12"
                 />
                 <button
                   type="button"
@@ -131,9 +145,9 @@ const Auth = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-200"
+              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 h-12 rounded-lg font-semibold transition-all duration-200"
             >
-              {loading ? 'Chargement...' : (isLogin ? 'Se connecter' : 'Créer un compte')}
+              {loading ? 'Loading...' : (isLogin ? 'Log In' : 'Create Account')}
             </Button>
           </form>
 
@@ -142,28 +156,28 @@ const Auth = () => {
               onClick={() => setIsLogin(!isLogin)}
               className="text-sm text-gray-400 hover:text-white transition-colors"
             >
-              {isLogin ? "Vous n'avez pas de compte? Créer un compte" : 'Vous avez déjà un compte? Se connecter'}
+              {isLogin ? "Don't have an account? Log In" : 'Already have an account? Log In'}
             </button>
           </div>
 
           <div className="mt-8 text-center">
-            <div className="text-sm text-gray-400 mb-4">OU</div>
+            <div className="text-sm text-gray-400 mb-4">OR</div>
             <div className="space-y-3">
               <Button
                 type="button"
                 variant="outline"
-                className="w-full bg-white text-gray-900 border-gray-300 hover:bg-gray-50 py-3"
+                className="w-full bg-white text-gray-900 border-gray-300 hover:bg-gray-50 h-12 flex items-center justify-center gap-3"
               >
-                <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google" className="w-5 h-5 mr-2" />
-                S'inscrire avec Google
+                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">G</div>
+                Sign up with Google
               </Button>
               <Button
                 type="button"
                 variant="outline"
-                className="w-full bg-blue-600 text-white border-blue-600 hover:bg-blue-700 py-3"
+                className="w-full bg-blue-600 text-white border-blue-600 hover:bg-blue-700 h-12 flex items-center justify-center gap-3"
               >
-                <div className="w-5 h-5 mr-2 bg-white rounded text-blue-600 flex items-center justify-center text-xs font-bold">f</div>
-                S'inscrire avec Facebook
+                <div className="w-5 h-5 bg-white rounded text-blue-600 flex items-center justify-center text-xs font-bold">f</div>
+                Sign up with Facebook
               </Button>
             </div>
           </div>
