@@ -10,6 +10,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
+import Login from "./pages/Login";
 import Restaurants from "./pages/Restaurants";
 import Reservation from "./pages/Reservation";
 import Events from "./pages/Events";
@@ -33,6 +34,7 @@ const App = () => (
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/login" element={<Login />} />
                 <Route path="/events" element={<Events />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />

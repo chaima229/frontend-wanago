@@ -7,13 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
-const Auth = () => {
+const Login = () => {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { login } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: '',
     email: '',
     password: '',
   });
@@ -24,12 +23,12 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const success = await register(formData.fullName, formData.email, formData.password);
+      const success = await login(formData.email, formData.password);
 
       if (success) {
         toast({
-          title: 'Compte créé',
-          description: 'Votre compte a été créé avec succès',
+          title: 'Connexion réussie',
+          description: 'Bienvenue !',
         });
         navigate('/');
       }
@@ -74,26 +73,11 @@ const Auth = () => {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-white mb-2">
-              Create Account
+              Log In
             </h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Full Name
-              </label>
-              <Input
-                type="text"
-                name="fullName"
-                value={formData.fullName}
-                onChange={handleInputChange}
-                placeholder="Anass Akker"
-                required
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 h-12"
-              />
-            </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 E-mail Address
@@ -138,16 +122,16 @@ const Auth = () => {
               disabled={loading}
               className="w-full bg-red-600 hover:bg-red-700 text-white py-3 h-12 rounded-lg font-semibold transition-all duration-200"
             >
-              {loading ? 'Loading...' : 'Create Account'}
+              {loading ? 'Loading...' : 'Log In'}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <Link
-              to="/login"
+              to="/auth"
               className="text-sm text-gray-400 hover:text-white transition-colors"
             >
-              Already have an account? Log In
+              Don't have an account? Create Account
             </Link>
           </div>
 
@@ -160,7 +144,7 @@ const Auth = () => {
                 className="w-full bg-white text-gray-900 border-gray-300 hover:bg-gray-50 h-12 flex items-center justify-center gap-3"
               >
                 <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">G</div>
-                Sign up with Google
+                Sign in with Google
               </Button>
               <Button
                 type="button"
@@ -168,7 +152,7 @@ const Auth = () => {
                 className="w-full bg-blue-600 text-white border-blue-600 hover:bg-blue-700 h-12 flex items-center justify-center gap-3"
               >
                 <div className="w-5 h-5 bg-white rounded text-blue-600 flex items-center justify-center text-xs font-bold">f</div>
-                Sign up with Facebook
+                Sign in with Facebook
               </Button>
             </div>
           </div>
@@ -178,4 +162,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default Login;
