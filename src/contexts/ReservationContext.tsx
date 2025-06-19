@@ -16,6 +16,7 @@ interface ReservationData {
   time?: string;
   guests?: number;
   city?: string;
+  reservationId?: string;
   customerInfo?: {
     fullName: string;
     email: string;

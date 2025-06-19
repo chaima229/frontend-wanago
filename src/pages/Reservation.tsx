@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReservation } from '../contexts/ReservationContext';
 import { useAuth } from '../contexts/AuthContext';
+import { ReservationService } from '../services/reservationService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, User, Mail, Phone, Check } from 'lucide-react';
@@ -19,7 +20,12 @@ const Reservation = () => {
     email: user?.email || '',
     phone: '',
   });
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const [selectedTime, setSelectedTime] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const availableTimes = [
+    '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'
+  ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCustomerInfo({
@@ -28,29 +34,67 @@ const Reservation = () => {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleTimeSelect = (time: string) => {
+    setSelectedTime(time);
+    updateReservation({ time });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone) {
+    if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone || !selectedTime) {
       toast({
         title: 'Erreur',
-        description: 'Veuillez remplir tous les champs requis.',
+        description: 'Veuillez remplir tous les champs requis et sélectionner une heure.',
         variant: 'destructive',
       });
       return;
     }
 
-    updateReservation({ customerInfo });
-    setCurrentStep(2);
-    setShowConfirmation(true);
-  };
+    if (!reservationData.restaurant || !reservationData.date || !reservationData.guests) {
+      toast({
+        title: 'Erreur',
+        description: 'Informations de réservation manquantes.',
+        variant: 'destructive',
+      });
+      return;
+    }
 
-  const handleConfirmReservation = () => {
-    toast({
-      title: 'Réservation confirmée !',
-      description: 'Votre réservation a été confirmée avec succès.',
-    });
-    navigate('/confirmation');
+    setLoading(true);
+    
+    try {
+      const reservationPayload = {
+        restaurantId: reservationData.restaurant.id,
+        date: reservationData.date,
+        time: selectedTime,
+        guests: reservationData.guests,
+        customerInfo,
+      };
+
+      const response = await ReservationService.createReservation(reservationPayload);
+      
+      updateReservation({ 
+        customerInfo,
+        time: selectedTime,
+        reservationId: response.reservation.id
+      });
+      
+      toast({
+        title: 'Réservation confirmée !',
+        description: 'Votre réservation a été créée avec succès.',
+      });
+      
+      navigate('/confirmation');
+    } catch (error) {
+      console.error('Reservation error:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Erreur lors de la création de la réservation. Veuillez réessayer.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCancel = () => {
@@ -68,12 +112,12 @@ const Reservation = () => {
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white text-lg font-medium">Étape {currentStep} / 4</h2>
+            <h2 className="text-white text-lg font-medium">Finaliser votre réservation</h2>
           </div>
           <div className="w-full bg-gray-700 rounded-full h-2">
             <div 
               className="bg-gradient-to-r from-purple-600 to-blue-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(currentStep / 4) * 100}%` }}
+              style={{ width: '75%' }}
             />
           </div>
         </div>
@@ -109,8 +153,28 @@ const Reservation = () => {
               {reservationData.restaurant.location}
             </p>
 
-            <div className="border-t border-gray-700 pt-4">
-              <div className="flex justify-between items-center mb-2">
+            <div className="border-t border-gray-700 pt-4 space-y-2">
+              {reservationData.date && (
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Date:</span>
+                  <span className="text-white">
+                    {new Date(reservationData.date).toLocaleDateString('fr-FR')}
+                  </span>
+                </div>
+              )}
+              {reservationData.guests && (
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Personnes:</span>
+                  <span className="text-white">{reservationData.guests}</span>
+                </div>
+              )}
+              {selectedTime && (
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Heure:</span>
+                  <span className="text-white">{selectedTime}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center pt-2 border-t border-gray-600">
                 <span className="text-gray-400">Prix par personne:</span>
                 <span className="text-blue-400 font-bold">
                   {reservationData.restaurant.price} MAD
@@ -119,7 +183,7 @@ const Reservation = () => {
               <div className="flex justify-between items-center text-lg font-bold text-white">
                 <span>Total:</span>
                 <span className="text-blue-400">
-                  {reservationData.restaurant.price} MAD
+                  {(reservationData.restaurant.price * (reservationData.guests || 1))} MAD
                 </span>
               </div>
             </div>
@@ -127,107 +191,92 @@ const Reservation = () => {
 
           {/* Reservation Form */}
           <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
-            {!showConfirmation ? (
-              <>
-                <div className="mb-6">
-                  <div className="flex items-center mb-4">
-                    <User className="w-5 h-5 text-blue-400 mr-3" />
-                    <span className="text-white font-medium">
-                      Connectez-vous pour réserver facilement ou inscrivez-vous pour gérer vos réservations à tout moment.
-                    </span>
-                  </div>
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <h4 className="text-lg font-bold text-white mb-4">Informations de réservation</h4>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <h4 className="text-lg font-bold text-white mb-4">Vos informations</h4>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Votre nom complet *
-                    </label>
-                    <Input
-                      type="text"
-                      name="fullName"
-                      value={customerInfo.fullName}
-                      onChange={handleInputChange}
-                      placeholder="Votre nom complet"
-                      required
-                      className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Email *
-                    </label>
-                    <Input
-                      type="email"
-                      name="email"
-                      value={customerInfo.email}
-                      onChange={handleInputChange}
-                      placeholder="Email"
-                      required
-                      className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
-                    />
-                    <p className="text-xs text-gray-400 mt-1">
-                      L'email de confirmation sera envoyé à cette adresse
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Numéro de téléphone *
-                    </label>
-                    <div className="flex">
-                      <div className="bg-gray-800 border border-gray-600 rounded-l-md px-3 py-2 text-white text-sm">
-                        MA +212
-                      </div>
-                      <Input
-                        type="tel"
-                        name="phone"
-                        value={customerInfo.phone}
-                        onChange={handleInputChange}
-                        placeholder="Numéro de téléphone"
-                        required
-                        className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 rounded-l-none border-l-0"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200"
-                  >
-                    Suivant →
-                  </Button>
-                </form>
-              </>
-            ) : (
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Check className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-4">Merci !</h3>
-                <p className="text-gray-300 mb-6">
-                  Vous êtes sur le point de finaliser votre réservation
-                </p>
-                <div className="space-y-4">
-                  <Button
-                    onClick={handleCancel}
-                    variant="outline"
-                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-800"
-                  >
-                    Annuler
-                  </Button>
-                  <Button
-                    onClick={handleConfirmReservation}
-                    className="w-full bg-green-600 text-white hover:bg-green-700"
-                  >
-                    Confirmer la réservation
-                  </Button>
+              {/* Time Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Sélectionnez votre heure *
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {availableTimes.map((time) => (
+                    <button
+                      key={time}
+                      type="button"
+                      onClick={() => handleTimeSelect(time)}
+                      className={`p-2 rounded-lg border transition-colors ${
+                        selectedTime === time
+                          ? 'bg-purple-600 border-purple-500 text-white'
+                          : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-purple-500'
+                      }`}
+                    >
+                      {time}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
+
+              <h5 className="text-md font-bold text-white">Vos informations</h5>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Nom complet *
+                </label>
+                <Input
+                  type="text"
+                  name="fullName"
+                  value={customerInfo.fullName}
+                  onChange={handleInputChange}
+                  placeholder="Votre nom complet"
+                  required
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Email *
+                </label>
+                <Input
+                  type="email"
+                  name="email"
+                  value={customerInfo.email}
+                  onChange={handleInputChange}
+                  placeholder="Email"
+                  required
+                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Téléphone *
+                </label>
+                <div className="flex">
+                  <div className="bg-gray-800 border border-gray-600 rounded-l-md px-3 py-2 text-white text-sm">
+                    +212
+                  </div>
+                  <Input
+                    type="tel"
+                    name="phone"
+                    value={customerInfo.phone}
+                    onChange={handleInputChange}
+                    placeholder="Numéro de téléphone"
+                    required
+                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 rounded-l-none border-l-0"
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50"
+              >
+                {loading ? 'Création en cours...' : 'Confirmer la réservation'}
+              </Button>
+            </form>
           </div>
         </div>
       </div>
