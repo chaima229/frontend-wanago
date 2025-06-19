@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, loginWithGoogle, loginWithFacebook } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -31,6 +31,12 @@ const Login = () => {
           description: 'Bienvenue !',
         });
         navigate('/');
+      } else {
+        toast({
+          title: 'Erreur',
+          description: 'Email ou mot de passe incorrect.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
@@ -40,6 +46,44 @@ const Login = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const success = await loginWithGoogle();
+      if (success) {
+        toast({
+          title: 'Connexion réussie',
+          description: 'Bienvenue !',
+        });
+        navigate('/');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Erreur de connexion avec Google.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleFacebookLogin = async () => {
+    try {
+      const success = await loginWithFacebook();
+      if (success) {
+        toast({
+          title: 'Connexion réussie',
+          description: 'Bienvenue !',
+        });
+        navigate('/');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Erreur de connexion avec Facebook.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -140,6 +184,7 @@ const Login = () => {
             <div className="space-y-3">
               <Button
                 type="button"
+                onClick={handleGoogleLogin}
                 variant="outline"
                 className="w-full bg-white text-gray-900 border-gray-300 hover:bg-gray-50 h-12 flex items-center justify-center gap-3"
               >
@@ -148,6 +193,7 @@ const Login = () => {
               </Button>
               <Button
                 type="button"
+                onClick={handleFacebookLogin}
                 variant="outline"
                 className="w-full bg-blue-600 text-white border-blue-600 hover:bg-blue-700 h-12 flex items-center justify-center gap-3"
               >

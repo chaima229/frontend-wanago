@@ -1,12 +1,16 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { AuthService, User } from '../services/authService';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../config/firebase';
+import { FirebaseAuthService, User } from '../services/firebaseAuthService';
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (fullName: string, email: string, password: string) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
+  loginWithFacebook: () => Promise<boolean>;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -28,28 +32,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAuthenticated = !!user;
 
   useEffect(() => {
-    const initAuth = async () => {
-      const token = localStorage.getItem('auth_token');
-      if (token) {
-        try {
-          const currentUser = await AuthService.getCurrentUser();
-          setUser(currentUser);
-        } catch (error) {
-          console.error('Error getting current user:', error);
-          localStorage.removeItem('auth_token');
-        }
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const user = FirebaseAuthService.convertFirebaseUser(firebaseUser);
+        setUser(user);
+      } else {
+        setUser(null);
       }
       setLoading(false);
-    };
+    });
 
-    initAuth();
+    return () => unsubscribe();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await AuthService.login(email, password);
-      setUser(response.user);
+      await FirebaseAuthService.login(email, password);
       return true;
     } catch (error) {
       console.error('Login failed:', error);
@@ -62,8 +61,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const register = async (fullName: string, email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await AuthService.register(fullName, email, password);
-      setUser(response.user);
+      await FirebaseAuthService.register(fullName, email, password);
       return true;
     } catch (error) {
       console.error('Registration failed:', error);
@@ -73,11 +71,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const loginWithGoogle = async (): Promise<boolean> => {
+    try {
+      setLoading(true);
+      await FirebaseAuthService.loginWithGoogle();
+      return true;
+    } catch (error) {
+      console.error('Google login failed:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithFacebook = async (): Promise<boolean> => {
+    try {
+      setLoading(true);
+      await FirebaseAuthService.loginWithFacebook();
+      return true;
+    } catch (error) {
+      console.error('Facebook login failed:', error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const logout = async (): Promise<void> => {
     try {
       setLoading(true);
-      await AuthService.logout();
-      setUser(null);
+      await FirebaseAuthService.logout();
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
@@ -90,6 +113,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isAuthenticated,
     login,
     register,
+    loginWithGoogle,
+    loginWithFacebook,
     logout,
     loading,
   };

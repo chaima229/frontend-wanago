@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, loginWithGoogle, loginWithFacebook } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -32,6 +32,12 @@ const Auth = () => {
           description: 'Votre compte a été créé avec succès',
         });
         navigate('/');
+      } else {
+        toast({
+          title: 'Erreur',
+          description: 'Erreur lors de la création du compte.',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       toast({
@@ -41,6 +47,44 @@ const Auth = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      const success = await loginWithGoogle();
+      if (success) {
+        toast({
+          title: 'Compte créé',
+          description: 'Votre compte a été créé avec succès',
+        });
+        navigate('/');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Erreur de connexion avec Google.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleFacebookSignup = async () => {
+    try {
+      const success = await loginWithFacebook();
+      if (success) {
+        toast({
+          title: 'Compte créé',
+          description: 'Votre compte a été créé avec succès',
+        });
+        navigate('/');
+      }
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: 'Erreur de connexion avec Facebook.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -156,6 +200,7 @@ const Auth = () => {
             <div className="space-y-3">
               <Button
                 type="button"
+                onClick={handleGoogleSignup}
                 variant="outline"
                 className="w-full bg-white text-gray-900 border-gray-300 hover:bg-gray-50 h-12 flex items-center justify-center gap-3"
               >
@@ -164,6 +209,7 @@ const Auth = () => {
               </Button>
               <Button
                 type="button"
+                onClick={handleFacebookSignup}
                 variant="outline"
                 className="w-full bg-blue-600 text-white border-blue-600 hover:bg-blue-700 h-12 flex items-center justify-center gap-3"
               >
