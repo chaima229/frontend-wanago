@@ -3,12 +3,13 @@ import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
+  apiKey: "AIzaSyDb-kdobgyf6A71MJvbkhPTOSYYXBwDcOA",
+  authDomain: "reservation-93215.firebaseapp.com",
+  projectId: "reservation-93215",
+  storageBucket: "reservation-93215.firebasestorage.app",
+  messagingSenderId: "33787360643",
+  appId: "1:33787360643:web:2cbba7a0910aad22fb72b6",
+  measurementId: "G-BQY1F5EZBQ"
 };
 
 const app = initializeApp(firebaseConfig);

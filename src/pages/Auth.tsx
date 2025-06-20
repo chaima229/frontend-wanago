@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,6 +5,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { auth } from "../config/firebase";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import axios from "axios";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -28,10 +30,28 @@ const Auth = () => {
 
       if (success) {
         toast({
-          title: 'Compte créé',
-          description: 'Votre compte a été créé avec succès',
+          title: 'Vérification requise',
+          description: 'Un code de validation a été envoyé à votre adresse email',
         });
-        navigate('/');
+        navigate('/validation');
+
+        const user = getAuth().currentUser;
+        if (user) {
+          const idToken = await user.getIdToken();
+          console.log("idToken:", idToken);
+          await axios.post("http://localhost:5000/api/users", {
+            uid: user.uid,
+            email: user.email,
+            name: formData.fullName,
+            // autres infos
+          }, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`
+            },
+          });
+        }
+        
       } else {
         toast({
           title: 'Erreur',
@@ -39,12 +59,20 @@ const Auth = () => {
           variant: 'destructive',
         });
       }
-    } catch (error) {
-      toast({
-        title: 'Erreur',
-        description: 'Une erreur est survenue. Veuillez réessayer.',
-        variant: 'destructive',
-      });
+    } catch (error: any) {
+      if (error.code === "auth/email-already-in-use") {
+        toast({
+          title: "Email déjà utilisé",
+          description: "Cet email est déjà associé à un compte. Veuillez vous connecter.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erreur",
+          description: "Erreur lors de la création du compte.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -95,6 +123,22 @@ const Auth = () => {
     });
   };
 
+  async function registerUser(email: string, password: string) {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    const idToken = await user.getIdToken();
+
+    // Appel backend pour créer l'utilisateur dans MongoDB
+    await axios.post("http://localhost:5000/api/users", {
+      uid: user.uid,
+      email: user.email,
+      name: formData.fullName,
+      // autres infos si besoin
+    }, {
+      headers: { Authorization: `Bearer ${idToken}` }
+    });
+  }
+
   return (
     <div className="min-h-screen flex">
       {/* Left side - Restaurant image */}
@@ -132,7 +176,7 @@ const Auth = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleInputChange}
-                placeholder="Anass Akker"
+                placeholder="Nom complet"
                 required
                 className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 h-12"
               />
@@ -147,7 +191,7 @@ const Auth = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="anass.akker@vnov.com"
+                placeholder="email@example.com"
                 required
                 className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 h-12"
               />

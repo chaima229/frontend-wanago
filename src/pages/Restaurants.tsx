@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReservation } from '../contexts/ReservationContext';
@@ -21,20 +20,23 @@ const Restaurants = () => {
         
         let restaurantsList: Restaurant[];
         
-        if (reservationData.city || reservationData.date || reservationData.guests) {
+        if (reservationData.ville || reservationData.date || reservationData.guests) {
           // Use search with filters
           const filters = {
-            city: reservationData.city,
+            ville: reservationData.ville,
             date: reservationData.date,
             guests: reservationData.guests,
           };
           const response = await RestaurantService.searchRestaurants(filters);
+          console.log('Search response:', response);
           restaurantsList = response.restaurants;
         } else {
           // Get all restaurants
           restaurantsList = await RestaurantService.getAllRestaurants();
+          console.log('All restaurants:', restaurantsList);
         }
         
+        console.log('Final restaurants list:', restaurantsList);
         setRestaurants(restaurantsList);
       } catch (error) {
         console.error('Error fetching restaurants:', error);
@@ -89,7 +91,9 @@ const Restaurants = () => {
   }, [reservationData, toast]);
 
   const handleSelectRestaurant = (restaurant: Restaurant) => {
+    console.log('Selecting restaurant:', restaurant);
     updateReservation({ restaurant });
+    console.log('Updated reservation data, navigating to reservation page');
     navigate('/reservation');
   };
 
@@ -110,8 +114,8 @@ const Restaurants = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-white mb-4">Restaurants disponibles</h1>
           <div className="text-gray-300">
-            {reservationData.city && (
-              <span>Ville: {reservationData.city} • </span>
+            {reservationData.ville && (
+              <span>Ville: {reservationData.ville} • </span>
             )}
             {reservationData.guests && (
               <span>{reservationData.guests} personne(s) • </span>

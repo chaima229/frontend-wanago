@@ -1,11 +1,13 @@
-
 import { ApiService } from './api';
+import { getAuth } from 'firebase/auth';
 
 export interface ReservationData {
   restaurantId: string;
   date: string;
   time: string;
   guests: number;
+  price: number; // Prix par personne
+  totalAmount: number; // Montant total
   customerInfo: {
     fullName: string;
     email: string;
@@ -17,6 +19,8 @@ export interface Reservation extends ReservationData {
   id: string;
   status: 'pending' | 'confirmed' | 'cancelled';
   createdAt: string;
+  price: number; // Prix par personne
+  totalAmount: number; // Montant total
   restaurant: {
     id: string;
     name: string;
@@ -32,7 +36,22 @@ export interface CreateReservationResponse {
 export class ReservationService {
   static async createReservation(data: ReservationData): Promise<CreateReservationResponse> {
     try {
-      return await ApiService.post<CreateReservationResponse>('/reservations', data);
+      // Get the current user's ID token
+      const auth = getAuth();
+      const user = auth.currentUser;
+      
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      const idToken = await user.getIdToken();
+      
+      // Add the token to the request headers
+      const headers = {
+        'Authorization': `Bearer ${idToken}`
+      };
+
+      return await ApiService.post<CreateReservationResponse>('/reservations', data, headers);
     } catch (error) {
       console.error('Create reservation error:', error);
       throw new Error('Erreur lors de la création de la réservation.');
@@ -41,7 +60,22 @@ export class ReservationService {
 
   static async getUserReservations(): Promise<Reservation[]> {
     try {
-      const response = await ApiService.get<{ reservations: Reservation[] }>('/reservations/my');
+      // Get the current user's ID token
+      const auth = getAuth();
+      const user = auth.currentUser;
+      
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      const idToken = await user.getIdToken();
+      
+      // Add the token to the request headers
+      const headers = {
+        'Authorization': `Bearer ${idToken}`
+      };
+
+      const response = await ApiService.get<{ reservations: Reservation[] }>('/reservations/my', headers);
       return response.reservations;
     } catch (error) {
       console.error('Get user reservations error:', error);
@@ -51,7 +85,22 @@ export class ReservationService {
 
   static async getReservationById(id: string): Promise<Reservation> {
     try {
-      return await ApiService.get<Reservation>(`/reservations/${id}`);
+      // Get the current user's ID token
+      const auth = getAuth();
+      const user = auth.currentUser;
+      
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      const idToken = await user.getIdToken();
+      
+      // Add the token to the request headers
+      const headers = {
+        'Authorization': `Bearer ${idToken}`
+      };
+
+      return await ApiService.get<Reservation>(`/reservations/${id}`, headers);
     } catch (error) {
       console.error('Get reservation error:', error);
       throw new Error('Erreur lors de la récupération de la réservation.');
@@ -60,7 +109,22 @@ export class ReservationService {
 
   static async cancelReservation(id: string): Promise<void> {
     try {
-      await ApiService.put(`/reservations/${id}/cancel`);
+      // Get the current user's ID token
+      const auth = getAuth();
+      const user = auth.currentUser;
+      
+      if (!user) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      const idToken = await user.getIdToken();
+      
+      // Add the token to the request headers
+      const headers = {
+        'Authorization': `Bearer ${idToken}`
+      };
+
+      await ApiService.put(`/reservations/${id}/cancel`, {}, headers);
     } catch (error) {
       console.error('Cancel reservation error:', error);
       throw new Error('Erreur lors de l\'annulation de la réservation.');

@@ -1,4 +1,3 @@
-
 import { ApiService } from './api';
 
 export interface Restaurant {
@@ -8,13 +7,14 @@ export interface Restaurant {
   description: string;
   location: string;
   price: number;
+  priceRange?: string;
   rating: number;
   cuisine: string;
   openingHours: string;
 }
 
 export interface SearchFilters {
-  city?: string;
+  ville?: string;
   date?: string;
   guests?: number;
   cuisine?: string;
@@ -33,7 +33,7 @@ export class RestaurantService {
     try {
       const queryParams = new URLSearchParams();
       
-      if (filters.city) queryParams.append('city', filters.city);
+      if (filters.ville) queryParams.append('ville', filters.ville);
       if (filters.date) queryParams.append('date', filters.date);
       if (filters.guests) queryParams.append('guests', filters.guests.toString());
       if (filters.cuisine) queryParams.append('cuisine', filters.cuisine);

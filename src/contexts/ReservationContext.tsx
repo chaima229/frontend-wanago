@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface Restaurant {
   id: string;
@@ -7,7 +6,8 @@ interface Restaurant {
   image: string;
   description: string;
   location: string;
-  price: number;
+  price: number; // Prix fixe par personne (maintenant obligatoire)
+  priceRange?: string; // Gardé pour compatibilité
 }
 
 interface ReservationData {
@@ -15,8 +15,10 @@ interface ReservationData {
   date?: string;
   time?: string;
   guests?: number;
-  city?: string;
+  ville?: string;
   reservationId?: string;
+  price?: number; // Prix par personne
+  totalAmount?: number; // Montant total
   customerInfo?: {
     fullName: string;
     email: string;
@@ -43,16 +45,42 @@ export const useReservation = () => {
 };
 
 export const ReservationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [reservationData, setReservationData] = useState<ReservationData>({});
+  // Load initial data from localStorage
+  const getInitialData = (): ReservationData => {
+    try {
+      const saved = localStorage.getItem('reservationData');
+      return saved ? JSON.parse(saved) : {};
+    } catch (error) {
+      console.error('Error loading reservation data from localStorage:', error);
+      return {};
+    }
+  };
+
+  const [reservationData, setReservationData] = useState<ReservationData>(getInitialData);
   const [currentStep, setCurrentStep] = useState(1);
 
+  // Save to localStorage whenever data changes
+  useEffect(() => {
+    try {
+      localStorage.setItem('reservationData', JSON.stringify(reservationData));
+    } catch (error) {
+      console.error('Error saving reservation data to localStorage:', error);
+    }
+  }, [reservationData]);
+
   const updateReservation = (data: Partial<ReservationData>) => {
-    setReservationData(prev => ({ ...prev, ...data }));
+    console.log('Updating reservation data:', data);
+    setReservationData(prev => {
+      const newData = { ...prev, ...data };
+      console.log('New reservation data:', newData);
+      return newData;
+    });
   };
 
   const clearReservation = () => {
     setReservationData({});
     setCurrentStep(1);
+    localStorage.removeItem('reservationData');
   };
 
   const value = {

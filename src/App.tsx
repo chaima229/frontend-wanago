@@ -18,6 +18,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Confirmation from "./pages/Confirmation";
 import NotFound from "./pages/NotFound";
+import Validation from "./pages/Validation";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +39,7 @@ const App = () => (
                 <Route path="/events" element={<Events />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/validation" element={<Validation />} />
                 <Route
                   path="/restaurants"
                   element={

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReservation } from '../contexts/ReservationContext';
@@ -14,6 +13,12 @@ const Reservation = () => {
   const { reservationData, updateReservation, setCurrentStep, currentStep } = useReservation();
   const { user } = useAuth();
   const { toast } = useToast();
+  
+  // Debug: Log reservation data
+  console.log('Reservation data:', reservationData);
+  console.log('Restaurant object:', reservationData.restaurant);
+  console.log('Restaurant ID:', reservationData.restaurant?.id);
+  console.log('Restaurant keys:', reservationData.restaurant ? Object.keys(reservationData.restaurant) : 'No restaurant');
   
   const [customerInfo, setCustomerInfo] = useState({
     fullName: user?.fullName || '',
@@ -42,6 +47,13 @@ const Reservation = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Debug: Log before validation
+    console.log('Submitting reservation with data:', {
+      customerInfo,
+      selectedTime,
+      reservationData
+    });
+    
     if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone || !selectedTime) {
       toast({
         title: 'Erreur',
@@ -52,9 +64,25 @@ const Reservation = () => {
     }
 
     if (!reservationData.restaurant || !reservationData.date || !reservationData.guests) {
+      console.error('Missing reservation data:', {
+        restaurant: reservationData.restaurant,
+        date: reservationData.date,
+        guests: reservationData.guests
+      });
       toast({
         title: 'Erreur',
-        description: 'Informations de réservation manquantes.',
+        description: 'Informations de réservation manquantes. Veuillez sélectionner un restaurant.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Additional check for restaurant ID
+    if (!reservationData.restaurant.id) {
+      console.error('Restaurant ID is missing:', reservationData.restaurant);
+      toast({
+        title: 'Erreur',
+        description: 'ID du restaurant manquant. Veuillez sélectionner un restaurant.',
         variant: 'destructive',
       });
       return;
@@ -63,20 +91,42 @@ const Reservation = () => {
     setLoading(true);
     
     try {
+      console.log('About to create reservation payload...');
+      console.log('Restaurant object at this point:', reservationData.restaurant);
+      console.log('Restaurant ID at this point:', reservationData.restaurant?.id);
+      
+      // Use restaurant price directly (now guaranteed to be present from backend)
+      const restaurantPrice = reservationData.restaurant.price || 0;
+      const totalAmount = restaurantPrice * (reservationData.guests || 1);
+      
       const reservationPayload = {
         restaurantId: reservationData.restaurant.id,
         date: reservationData.date,
         time: selectedTime,
         guests: reservationData.guests,
         customerInfo,
+        price: restaurantPrice, // Prix par personne
+        totalAmount: totalAmount, // Montant total
       };
+
+      console.log('Sending reservation payload:', reservationPayload);
+      console.log('Payload validation:');
+      console.log('- restaurantId:', !!reservationPayload.restaurantId);
+      console.log('- date:', !!reservationPayload.date);
+      console.log('- time:', !!reservationPayload.time);
+      console.log('- guests:', !!reservationPayload.guests);
+      console.log('- customerInfo:', !!reservationPayload.customerInfo);
+      console.log('- price:', !!reservationPayload.price);
+      console.log('- totalAmount:', !!reservationPayload.totalAmount);
 
       const response = await ReservationService.createReservation(reservationPayload);
       
       updateReservation({ 
         customerInfo,
         time: selectedTime,
-        reservationId: response.reservation.id
+        reservationId: response.reservation.id,
+        price: restaurantPrice,
+        totalAmount: totalAmount
       });
       
       toast({
@@ -101,7 +151,9 @@ const Reservation = () => {
     navigate('/restaurants');
   };
 
-  if (!reservationData.restaurant) {
+  // Enhanced check for restaurant data
+  if (!reservationData || !reservationData.restaurant) {
+    console.log('No restaurant data found, redirecting to restaurants page');
     navigate('/restaurants');
     return null;
   }

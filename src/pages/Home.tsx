@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Users } from 'lucide-react';
@@ -22,7 +21,7 @@ const Home = () => {
 
     updateReservation({
       date: departureDate,
-      city,
+      ville: city,
       guests: parseInt(guests),
     });
 

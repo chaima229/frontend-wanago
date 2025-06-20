@@ -1,5 +1,4 @@
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export class ApiService {
   private static baseURL = API_BASE_URL;
@@ -17,13 +16,15 @@ export class ApiService {
 
   static async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    customHeaders?: Record<string, string>
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
+      ...customHeaders,
     };
 
     if (this.token) {
@@ -53,25 +54,25 @@ export class ApiService {
     }
   }
 
-  static async get<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET' });
+  static async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
+    return this.request<T>(endpoint, { method: 'GET' }, headers);
   }
 
-  static async post<T>(endpoint: string, data?: any): Promise<T> {
+  static async post<T>(endpoint: string, data?: any, headers?: Record<string, string>): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
-    });
+    }, headers);
   }
 
-  static async put<T>(endpoint: string, data?: any): Promise<T> {
+  static async put<T>(endpoint: string, data?: any, headers?: Record<string, string>): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
-    });
+    }, headers);
   }
 
-  static async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE' });
+  static async delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
+    return this.request<T>(endpoint, { method: 'DELETE' }, headers);
   }
 }
