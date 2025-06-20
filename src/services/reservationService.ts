@@ -15,17 +15,31 @@ export interface ReservationData {
   };
 }
 
-export interface Reservation extends ReservationData {
+export interface Reservation {
   id: string;
+  userId: string;
+  itemType: string;
+  itemId: string;
+  date: string;
+  time: string;
+  participants: number; // Backend field
+  guests: number; // Frontend compatibility field
   status: 'pending' | 'confirmed' | 'cancelled';
-  createdAt: string;
+  paymentStatus: 'pending' | 'paid' | 'failed';
   price: number; // Prix par personne
   totalAmount: number; // Montant total
+  customerInfo: {
+    fullName: string;
+    email: string;
+    phone: string;
+  };
   restaurant: {
     id: string;
     name: string;
     location: string;
   };
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface CreateReservationResponse {
@@ -75,8 +89,8 @@ export class ReservationService {
         'Authorization': `Bearer ${idToken}`
       };
 
-      const response = await ApiService.get<{ reservations: Reservation[] }>('/reservations/my', headers);
-      return response.reservations;
+      const response = await ApiService.get<Reservation[]>('/reservations/my', headers);
+      return response || [];
     } catch (error) {
       console.error('Get user reservations error:', error);
       throw new Error('Erreur lors de la récupération des réservations.');

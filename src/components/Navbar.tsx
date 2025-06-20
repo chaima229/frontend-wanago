@@ -1,12 +1,13 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { useRole } from '@/hooks/use-role';
 
 const Navbar = () => {
   const location = useLocation();
   const { isAuthenticated, logout, user } = useAuth();
+  const { isAdmin } = useRole();
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -15,15 +16,10 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
-  // Add dashboard for authenticated users and admin panel for admin users
+  // Add dashboard for authenticated users
   const authenticatedNavItems = isAuthenticated 
     ? [...navItems, { name: 'Dashboard', path: '/dashboard' }]
     : navItems;
-
-  // Add admin link if user is admin (you'd check this based on user role)
-  const finalNavItems = isAuthenticated && user?.role === 'admin'
-    ? [...authenticatedNavItems, { name: 'Admin', path: '/admin' }]
-    : authenticatedNavItems;
 
   return (
     <nav className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
@@ -34,7 +30,7 @@ const Navbar = () => {
               RestaurantGo
             </Link>
             <div className="hidden md:flex space-x-6">
-              {finalNavItems.map((item) => (
+              {authenticatedNavItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.path}
@@ -51,6 +47,17 @@ const Navbar = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            {isAdmin && (
+              <Link to="/admin-dashboard">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="bg-purple-700 text-white hover:bg-purple-800"
+                >
+                  Admin Dashboard
+                </Button>
+              </Link>
+            )}
             {isAuthenticated ? (
               <>
                 <span className="text-gray-300 text-sm">Welcome, {user?.fullName}</span>

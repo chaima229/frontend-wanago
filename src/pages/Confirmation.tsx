@@ -29,16 +29,20 @@ const Confirmation = () => {
       if (paymentMethod === 'paypal') {
         const paymentData = {
           reservationId: reservationData.reservationId,
-          amount: reservationData.totalAmount || (getRestaurantPrice() * (reservationData.guests || 1)),
-          currency: 'MAD',
+          montant: reservationData.totalAmount || (getRestaurantPrice() * (reservationData.guests || 1)),
+          currency: 'USD',
           paymentMethod: 'paypal'
         };
 
-        const response = await PaymentService.createPayPalOrder(paymentData);
-        
-        // Rediriger vers PayPal
+        const response = await PaymentService.createPayment(paymentData);
+        // Si le backend retourne approvalUrl, redirige vers PayPal
         if (response.approvalUrl) {
           window.location.href = response.approvalUrl;
+        } else if (response.success) {
+          alert('Paiement enregistré avec succès !');
+          // Redirige ou affiche un message de succès
+        } else {
+          alert(response.message || 'Erreur lors du paiement.');
         }
       }
     } catch (error) {
