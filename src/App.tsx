@@ -14,6 +14,7 @@ import Login from "./pages/Login";
 import Restaurants from "./pages/Restaurants";
 import Reservation from "./pages/Reservation";
 import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import Events from "./pages/Events";
 import About from "./pages/About";
 import Contact from "./pages/Contact";

@@ -15,10 +15,15 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
-  // Add dashboard for authenticated users
+  // Add dashboard for authenticated users and admin panel for admin users
   const authenticatedNavItems = isAuthenticated 
     ? [...navItems, { name: 'Dashboard', path: '/dashboard' }]
     : navItems;
+
+  // Add admin link if user is admin (you'd check this based on user role)
+  const finalNavItems = isAuthenticated && user?.role === 'admin'
+    ? [...authenticatedNavItems, { name: 'Admin', path: '/admin' }]
+    : authenticatedNavItems;
 
   return (
     <nav className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
@@ -29,7 +34,7 @@ const Navbar = () => {
               RestaurantGo
             </Link>
             <div className="hidden md:flex space-x-6">
-              {authenticatedNavItems.map((item) => (
+              {finalNavItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.path}
