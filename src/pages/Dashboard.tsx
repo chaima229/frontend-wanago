@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, Users, MapPin, Phone, Mail, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { PaymentService } from '../services/paymentService';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -35,6 +36,23 @@ const Dashboard = () => {
       toast({
         title: 'Erreur',
         description: 'Erreur lors de l\'annulation de la réservation.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handlePayReservation = async (reservation) => {
+    try {
+      await PaymentService.createPayment({
+        reservationId: reservation.id,
+        montant: reservation.totalAmount,
+        currency: 'MAD',
+        paymentMethod: 'paypal'
+      });
+    } catch (error) {
+      toast({
+        title: 'Erreur',
+        description: error.message || 'Erreur lors de la création du paiement.',
         variant: 'destructive',
       });
     }
@@ -219,8 +237,8 @@ const Dashboard = () => {
                     </div>
                     
                     {/* Actions */}
-                    {reservation.status === 'confirmed' || reservation.status === 'pending' ? (
-                      <div className="mt-6 pt-4 border-t border-gray-700">
+                    {reservation.status === 'pending' && (
+                      <div className="mt-6 pt-4 border-t border-gray-700 flex gap-2">
                         <Button
                           onClick={() => handleCancelReservation(reservation.id)}
                           variant="destructive"
@@ -228,8 +246,20 @@ const Dashboard = () => {
                         >
                           Annuler la réservation
                         </Button>
+                        <Button
+                          onClick={() => handlePayReservation(reservation)}
+                          variant="default"
+                          size="sm"
+                        >
+                          Payer
+                        </Button>
                       </div>
-                    ) : null}
+                    )}
+                    {reservation.status === 'confirmed' && (
+                      <div className="mt-6 pt-4 border-t border-gray-700">
+                        <span className="text-green-400 font-semibold">Réservation confirmée et payée</span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
