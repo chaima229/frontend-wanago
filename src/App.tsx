@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Restaurants from "./pages/Restaurants";
 import Reservation from "./pages/Reservation";
+import Dashboard from "./pages/Dashboard";
 import Events from "./pages/Events";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
@@ -53,6 +54,14 @@ const App = () => (
                   element={
                     <ProtectedRoute>
                       <Reservation />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/dashboard"
+                  element={
+                    <ProtectedRoute>
+                      <Dashboard />
                     </ProtectedRoute>
                   }
                 />

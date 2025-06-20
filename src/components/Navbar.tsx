@@ -15,6 +15,11 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
+  // Add dashboard for authenticated users
+  const authenticatedNavItems = isAuthenticated 
+    ? [...navItems, { name: 'Dashboard', path: '/dashboard' }]
+    : navItems;
+
   return (
     <nav className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,7 +29,7 @@ const Navbar = () => {
               RestaurantGo
             </Link>
             <div className="hidden md:flex space-x-6">
-              {navItems.map((item) => (
+              {authenticatedNavItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.path}
