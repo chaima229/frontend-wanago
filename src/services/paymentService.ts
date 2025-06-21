@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 
 export interface PaymentData {
   reservationId: string;
-  amount: number;
+  montant: number;
   currency: string;
   paymentMethod: string;
 }

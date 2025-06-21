@@ -1,7 +1,9 @@
 import { ApiService } from './api';
 import { getAuth } from 'firebase/auth';
+import type { User } from './firebaseAuthService'; // Importer le type User depuis le bon endroit
+import type { Event } from './eventService'; // Importer le type Event
 
-export interface ReservationData {
+export interface RestaurantReservationData {
   restaurantId: string;
   date: string;
   time: string;
@@ -15,28 +17,47 @@ export interface ReservationData {
   };
 }
 
-export interface Reservation {
-  id: string;
-  userId: string;
-  itemType: string;
+export interface EventReservationData {
+  itemType: 'event';
   itemId: string;
   date: string;
-  time: string;
-  participants: number; // Backend field
-  guests: number; // Frontend compatibility field
-  status: 'pending' | 'confirmed' | 'cancelled';
-  paymentStatus: 'pending' | 'paid' | 'failed';
-  price: number; // Prix par personne
-  totalAmount: number; // Montant total
+  participants: number;
+  price?: number;
+  totalAmount?: number;
   customerInfo: {
     fullName: string;
     email: string;
     phone: string;
   };
-  restaurant: {
-    id: string;
+}
+
+export interface Reservation {
+  _id: string;
+  userId: string;
+  itemType: string;
+  itemId: string;
+  date: string;
+  time?: string;
+  participants: number; // Backend field
+  guests: number; // Frontend compatibility field
+  status: 'pending' | 'confirmed' | 'cancelled';
+  paymentStatus: 'pending' | 'paid' | 'failed';
+  price: number; // Prix par personne
+  totalAmount?: number; // Montant total
+  customerInfo: {
+    fullName: string;
+    email: string;
+    phone: string;
+  };
+  restaurant?: { // Rendre optionnel
+    _id: string;
     name: string;
-    location: string;
+    location: any;
+  };
+  event?: { // Ajouter le champ event
+    _id: string;
+    title: string;
+    location: any;
   };
   createdAt: string;
   updatedAt: string;
@@ -48,7 +69,7 @@ export interface CreateReservationResponse {
 }
 
 export class ReservationService {
-  static async createReservation(data: ReservationData): Promise<CreateReservationResponse> {
+  static async createRestaurantReservation(data: RestaurantReservationData): Promise<CreateReservationResponse> {
     try {
       // Get the current user's ID token
       const auth = getAuth();
@@ -65,10 +86,57 @@ export class ReservationService {
         'Authorization': `Bearer ${idToken}`
       };
 
-      return await ApiService.post<CreateReservationResponse>('/reservations', data, headers);
+      const payload = {
+        itemType: 'restaurant',
+        itemId: data.restaurantId,
+        date: data.date,
+        participants: data.guests, // Map guests to participants
+        time: data.time,
+        price: data.price,
+        totalAmount: data.totalAmount,
+        customerInfo: data.customerInfo
+      };
+
+      return await ApiService.post<CreateReservationResponse>('/reservations', payload, headers);
     } catch (error) {
       console.error('Create reservation error:', error);
       throw new Error('Erreur lors de la création de la réservation.');
+    }
+  }
+
+  static async createEventReservation(event: Event, currentUser: User): Promise<CreateReservationResponse> {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      
+      if (!user || !currentUser) {
+        throw new Error('Utilisateur non authentifié');
+      }
+
+      const idToken = await user.getIdToken();
+      
+      const headers = {
+        'Authorization': `Bearer ${idToken}`
+      };
+
+      const reservationData: EventReservationData = {
+        itemType: 'event',
+        itemId: event._id,
+        date: event.dateStart,
+        participants: 1, // Par défaut à 1 pour un événement
+        price: event.price,
+        totalAmount: event.price,
+        customerInfo: {
+          fullName: currentUser.fullName, // Correction: .name -> .fullName
+          email: currentUser.email,
+          phone: currentUser.phone || '',
+        }
+      };
+
+      return await ApiService.post<CreateReservationResponse>('/reservations', reservationData, headers);
+    } catch (error) {
+      console.error('Create event reservation error:', error);
+      throw new Error('Erreur lors de la création de la réservation de l\'événement.');
     }
   }
 

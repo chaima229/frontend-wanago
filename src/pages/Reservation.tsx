@@ -1,31 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useReservation } from '../contexts/ReservationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ReservationService } from '../services/reservationService';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, User, Mail, Phone, Check } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import DatePicker from '@/components/DatePicker';
 
 const Reservation = () => {
   const navigate = useNavigate();
-  const { reservationData, updateReservation, setCurrentStep, currentStep } = useReservation();
+  const { reservationData, updateReservation } = useReservation();
   const { user } = useAuth();
   const { toast } = useToast();
   
-  // Debug: Log reservation data
-  console.log('Reservation data:', reservationData);
-  console.log('Restaurant object:', reservationData.restaurant);
-  console.log('Restaurant ID:', reservationData.restaurant?.id);
-  console.log('Restaurant keys:', reservationData.restaurant ? Object.keys(reservationData.restaurant) : 'No restaurant');
+  useEffect(() => {
+    console.log('Reservation data updated:', reservationData);
+  }, [reservationData]);
   
   const [customerInfo, setCustomerInfo] = useState({
     fullName: user?.fullName || '',
     email: user?.email || '',
     phone: '',
   });
-  const [selectedTime, setSelectedTime] = useState('');
+  const [selectedTime, setSelectedTime] = useState(reservationData.time || '');
   const [loading, setLoading] = useState(false);
 
   const availableTimes = [
@@ -47,39 +46,34 @@ const Reservation = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Debug: Log before validation
-    console.log('Submitting reservation with data:', {
-      customerInfo,
-      selectedTime,
-      reservationData
-    });
-    
-    if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone || !selectedTime) {
+    if (!reservationData.date) {
       toast({
-        title: 'Erreur',
-        description: 'Veuillez remplir tous les champs requis et sélectionner une heure.',
+        title: 'Date manquante',
+        description: 'Veuillez sélectionner une date pour votre réservation.',
         variant: 'destructive',
       });
       return;
     }
 
-    if (!reservationData.restaurant || !reservationData.date || !reservationData.guests) {
-      console.error('Missing reservation data:', {
-        restaurant: reservationData.restaurant,
-        date: reservationData.date,
-        guests: reservationData.guests
-      });
+    if (!customerInfo.fullName || !customerInfo.email || !customerInfo.phone || !selectedTime || !reservationData.guests) {
       toast({
         title: 'Erreur',
-        description: 'Informations de réservation manquantes. Veuillez sélectionner un restaurant.',
+        description: 'Veuillez remplir tous les champs requis, sélectionner une heure et un nombre de personnes.',
         variant: 'destructive',
       });
       return;
     }
 
-    // Additional check for restaurant ID
+    if (!reservationData.restaurant || !reservationData.date) {
+      toast({
+        title: 'Erreur',
+        description: 'Informations de réservation manquantes. Veuillez retourner et sélectionner un restaurant et une date.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     if (!reservationData.restaurant.id) {
-      console.error('Restaurant ID is missing:', reservationData.restaurant);
       toast({
         title: 'Erreur',
         description: 'ID du restaurant manquant. Veuillez sélectionner un restaurant.',
@@ -91,11 +85,6 @@ const Reservation = () => {
     setLoading(true);
     
     try {
-      console.log('About to create reservation payload...');
-      console.log('Restaurant object at this point:', reservationData.restaurant);
-      console.log('Restaurant ID at this point:', reservationData.restaurant?.id);
-      
-      // Use restaurant price directly (now guaranteed to be present from backend)
       const restaurantPrice = reservationData.restaurant.price || 0;
       const totalAmount = restaurantPrice * (reservationData.guests || 1);
       
@@ -105,26 +94,20 @@ const Reservation = () => {
         time: selectedTime,
         guests: reservationData.guests,
         customerInfo,
-        price: restaurantPrice, // Prix par personne
-        totalAmount: totalAmount, // Montant total
+        price: restaurantPrice,
+        totalAmount: totalAmount,
       };
 
-      console.log('Sending reservation payload:', reservationPayload);
-      console.log('Payload validation:');
-      console.log('- restaurantId:', !!reservationPayload.restaurantId);
-      console.log('- date:', !!reservationPayload.date);
-      console.log('- time:', !!reservationPayload.time);
-      console.log('- guests:', !!reservationPayload.guests);
-      console.log('- customerInfo:', !!reservationPayload.customerInfo);
-      console.log('- price:', !!reservationPayload.price);
-      console.log('- totalAmount:', !!reservationPayload.totalAmount);
-
-      const response = await ReservationService.createReservation(reservationPayload);
+      const response = await ReservationService.createRestaurantReservation(reservationPayload);
+      
+      if (!response || !response.reservation || !response.reservation._id) {
+        throw new Error('Réponse invalide du serveur: ID de réservation manquant');
+      }
       
       updateReservation({ 
         customerInfo,
         time: selectedTime,
-        reservationId: response.reservation.id,
+        reservationId: response.reservation._id,
         price: restaurantPrice,
         totalAmount: totalAmount
       });
@@ -151,9 +134,7 @@ const Reservation = () => {
     navigate('/restaurants');
   };
 
-  // Enhanced check for restaurant data
   if (!reservationData || !reservationData.restaurant) {
-    console.log('No restaurant data found, redirecting to restaurants page');
     navigate('/restaurants');
     return null;
   }
@@ -202,7 +183,7 @@ const Reservation = () => {
               {reservationData.restaurant.description}
             </p>
             <p className="text-gray-300 mb-4">
-              {reservationData.restaurant.location}
+              {reservationData.restaurant.address}, {reservationData.restaurant.ville}
             </p>
 
             <div className="border-t border-gray-700 pt-4 space-y-2">
@@ -246,6 +227,15 @@ const Reservation = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <h4 className="text-lg font-bold text-white mb-4">Informations de réservation</h4>
 
+              {/* Date Selection */}
+              <div>
+                <DatePicker 
+                  label="Date de réservation *"
+                  selected={reservationData.date}
+                  onDateSelect={(date) => updateReservation({ date })}
+                />
+              </div>
+
               {/* Time Selection */}
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-3">
@@ -264,6 +254,29 @@ const Reservation = () => {
                       }`}
                     >
                       {time}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Number of Guests Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-3">
+                  Nombre de personnes *
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => updateReservation({ guests: num })}
+                      className={`p-3 rounded-lg border transition-colors ${
+                        reservationData.guests === num
+                          ? 'bg-purple-600 border-purple-500 text-white'
+                          : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-purple-500'
+                      }`}
+                    >
+                      {num} {num === 1 ? 'personne' : 'personnes'}
                     </button>
                   ))}
                 </div>

@@ -19,6 +19,8 @@ const Confirmation = () => {
   const handlePayment = async (paymentMethod: string) => {
     if (!reservationData.reservationId) {
       console.error('ID de réservation manquant');
+      alert('Erreur: ID de réservation manquant. Veuillez refaire votre réservation.');
+      navigate('/restaurants');
       return;
     }
 
@@ -30,9 +32,11 @@ const Confirmation = () => {
         const paymentData = {
           reservationId: reservationData.reservationId,
           montant: reservationData.totalAmount || (getRestaurantPrice() * (reservationData.guests || 1)),
-          currency: 'USD',
+          currency: 'MAD', // Changed from USD to MAD to match backend
           paymentMethod: 'paypal'
         };
+
+        console.log('Creating payment with data:', paymentData);
 
         const response = await PaymentService.createPayment(paymentData);
         // Si le backend retourne approvalUrl, redirige vers PayPal
@@ -97,7 +101,7 @@ const Confirmation = () => {
                       <h4 className="font-bold text-white">{reservationData.restaurant.name}</h4>
                       <div className="flex items-center text-gray-300 text-sm">
                         <MapPin className="w-4 h-4 mr-1" />
-                        {reservationData.restaurant.location}
+                        {reservationData.restaurant.address}, {reservationData.restaurant.ville}
                       </div>
                     </div>
                   </div>

@@ -1,16 +1,22 @@
 import { ApiService } from './api';
 
+export interface GeoJSONPoint {
+  type: 'Point';
+  coordinates: [number, number]; // [longitude, latitude]
+}
 export interface Restaurant {
-  id: string;
+  _id: string;
   name: string;
   image: string;
   description: string;
-  location: string;
-  price: number;
+  location: GeoJSONPoint | string;
+  price?: number; // Rendre optionnel car pas toujours présent
   priceRange?: string;
-  rating: number;
+  rating?: number; // Rendre optionnel
   cuisine: string;
   openingHours: string;
+  ownerId?: string;
+  distance?: number; // Distance in meters from user
 }
 
 export interface SearchFilters {
@@ -50,6 +56,17 @@ export class RestaurantService {
     }
   }
 
+  static async getNearbyRestaurants(latitude: number, longitude: number, radius: number = 10000): Promise<Restaurant[]> {
+    try {
+      const endpoint = `/restaurants/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`;
+      const response = await ApiService.get<{ restaurants: Restaurant[] }>(endpoint);
+      return response.restaurants;
+    } catch (error) {
+      console.error('Nearby restaurants error:', error);
+      throw new Error('Erreur lors de la récupération des restaurants à proximité.');
+    }
+  }
+
   static async getRestaurantById(id: string): Promise<Restaurant> {
     try {
       return await ApiService.get<Restaurant>(`/restaurants/${id}`);
@@ -61,8 +78,8 @@ export class RestaurantService {
 
   static async getAllRestaurants(): Promise<Restaurant[]> {
     try {
-      const response = await ApiService.get<RestaurantSearchResponse>('/restaurants');
-      return response.restaurants;
+      const response = await ApiService.get<Restaurant[]>('/restaurants');
+      return response || [];
     } catch (error) {
       console.error('Get all restaurants error:', error);
       throw new Error('Erreur lors de la récupération des restaurants.');

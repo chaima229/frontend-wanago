@@ -5,9 +5,11 @@ interface Restaurant {
   name: string;
   image: string;
   description: string;
-  location: string;
-  price: number; // Prix fixe par personne (maintenant obligatoire)
-  priceRange?: string; // Gardé pour compatibilité
+  address: string;
+  ville: string;
+  location: any;
+  price: number;
+  priceRange?: string;
 }
 
 interface ReservationData {
@@ -17,8 +19,8 @@ interface ReservationData {
   guests?: number;
   ville?: string;
   reservationId?: string;
-  price?: number; // Prix par personne
-  totalAmount?: number; // Montant total
+  price?: number;
+  totalAmount?: number;
   customerInfo?: {
     fullName: string;
     email: string;
@@ -45,7 +47,6 @@ export const useReservation = () => {
 };
 
 export const ReservationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Load initial data from localStorage
   const getInitialData = (): ReservationData => {
     try {
       const saved = localStorage.getItem('reservationData');
@@ -59,7 +60,6 @@ export const ReservationProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [reservationData, setReservationData] = useState<ReservationData>(getInitialData);
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Save to localStorage whenever data changes
   useEffect(() => {
     try {
       localStorage.setItem('reservationData', JSON.stringify(reservationData));
@@ -69,12 +69,7 @@ export const ReservationProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [reservationData]);
 
   const updateReservation = (data: Partial<ReservationData>) => {
-    console.log('Updating reservation data:', data);
-    setReservationData(prev => {
-      const newData = { ...prev, ...data };
-      console.log('New reservation data:', newData);
-      return newData;
-    });
+    setReservationData(prev => ({ ...prev, ...data }));
   };
 
   const clearReservation = () => {

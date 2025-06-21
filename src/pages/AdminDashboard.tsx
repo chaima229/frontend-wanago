@@ -326,7 +326,7 @@ const AdminDashboard = () => {
                             <h3 className="text-white font-semibold">{restaurant.name}</h3>
                             <div className="flex items-center text-gray-400 text-sm mt-1">
                               <MapPin className="h-4 w-4 mr-1" />
-                              {restaurant.location}
+                              {restaurant.address}, {restaurant.ville}
                             </div>
                             <p className="text-gray-400 text-sm">{restaurant.cuisine}</p>
                           </div>
