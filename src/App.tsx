@@ -15,6 +15,7 @@ import Reservation from "./pages/Reservation";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
 import Events from "./pages/Events";
+import EventDetail from "./pages/EventDetail"; // Importer le nouveau composant
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Confirmation from "./pages/Confirmation";
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/events" element={<Events />} />
+                <Route path="/events/:id" element={<EventDetail />} /> {/* Ajouter la nouvelle route */}
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/validation" element={<Validation />} />
@@ -110,4 +112,5 @@ const App = () => (
   </QueryClientProvider>
 );
 
+// Force re-evaluation by bundler
 export default App;

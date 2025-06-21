@@ -1,73 +1,57 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, MapPin, Clock, Loader2, Compass } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Loader2 } from 'lucide-react';
 import { EventService, Event } from '@/services/eventService';
-import { ReservationService } from '@/services/reservationService'; // Importer le service
-import { useGeolocation } from '@/hooks/useGeolocation';
-import type { GeoJSONPoint } from '@/services/restaurantService';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext'; // Importer useAuth
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'; // Importer Tooltip
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 
-
-const eventImage = '/lovable-uploads/2aa0cf26-fb8b-4c05-b09c-7a7aa4d64ea4.png';
-
-const formatDistance = (meters?: number) => {
-  if (meters === undefined) return null;
-  if (meters < 1000) {
-    return `${Math.round(meters)} m`;
-  }
-  return `${(meters / 1000).toFixed(1)} km`;
+// --- Déplacé et adapté depuis EventMap.tsx ---
+const createEventIcon = () => {
+  return L.divIcon({
+    html: `
+      <div style="
+        background-color: #3498db; // Couleur bleue pour les événements
+        width: 30px;
+        height: 30px;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      ">
+        <div style="
+          transform: rotate(45deg);
+          color: white;
+          font-size: 16px;
+          font-weight: bold;
+          text-align: center;
+          line-height: 1;
+        ">🎉</div>
+      </div>
+    `,
+    className: 'custom-marker',
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -30]
+  });
 };
-
-const formatLocation = (location: GeoJSONPoint | string) => {
-  if (typeof location === 'string') {
-    return location;
-  }
-  return 'À proximité';
-};
-
+// --- Fin du code déplacé ---
 
 const Events = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth(); // Obtenir l'utilisateur
-  const [promoCode, setPromoCode] = useState('');
-  const [showPayment, setShowPayment] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [pageLoading, setPageLoading] = useState(true);
-  const [title, setTitle] = useState('Événements');
-  const [reservingEventId, setReservingEventId] = useState<string | null>(null);
-
-  const { latitude, longitude, error: geoError, loading: geoLoading } = useGeolocation();
-
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
         setPageLoading(true);
-        let eventsList: Event[] = [];
-        
-        if (!geoLoading) {
-          if (latitude && longitude) {
-            setTitle('Événements à proximité');
-            eventsList = await EventService.getNearbyEvents(latitude, longitude);
-          } else {
-            setTitle('Tous les événements');
-            if (geoError) {
-              toast({
-                title: 'Géolocalisation échouée',
-                description: `${geoError}. Affichage de tous les événements.`,
-                variant: 'default',
-              });
-            }
-            eventsList = await EventService.getAllEvents();
-          }
-        }
+        const eventsList = await EventService.getAllEvents();
         setEvents(eventsList);
       } catch (error) {
         console.error('Error fetching events:', error);
@@ -80,125 +64,131 @@ const Events = () => {
         setPageLoading(false);
       }
     };
-    if(!geoLoading) {
-      fetchEvents();
-    }
-  }, [toast, latitude, longitude, geoError, geoLoading]);
+    fetchEvents();
+  }, [toast]);
 
-
-  const handleValidatePromo = () => {
-    console.log('Validating promo code:', promoCode);
+  const handleSelectEvent = (event: Event) => {
+    navigate(`/events/${event._id}`);
   };
-
-  const handleReserveClick = async (event: Event) => {
-    if (!user) {
-      toast({
-        title: "Connexion requise",
-        description: "Vous devez être connecté pour réserver.",
-        variant: "destructive"
-      });
-      navigate('/login');
-      return;
-    }
-
-    setReservingEventId(event._id);
-    try {
-      await ReservationService.createEventReservation(event, user);
-      toast({
-        title: "Réservation réussie !",
-        description: `Votre place pour l'événement "${event.title}" a été réservée.`,
-        variant: "default"
-      });
-      navigate('/dashboard'); // Rediriger vers le tableau de bord
-    } catch (error) {
-      toast({
-        title: "Échec de la réservation",
-        description: error instanceof Error ? error.message : "Une erreur inconnue est survenue.",
-        variant: "destructive"
-      });
-    } finally {
-      setReservingEventId(null);
-    }
-  };
-
-  if (showPayment) {
-    // ... (Le code du formulaire de paiement reste identique pour l'instant)
-    // ... Il faudra le lier à un vrai service de paiement plus tard.
-    return (
-        <div>Paiement pour {selectedEvent?.title}</div>
-    )
-  }
 
   if (pageLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-4" />
-          <p className="text-white">{geoLoading ? 'Récupération de votre position...' : 'Chargement des événements...'}</p>
+          <p className="text-white">Chargement des événements...</p>
         </div>
       </div>
     );
   }
+  
+  // Filtrer les événements valides et calculer le centre/zoom
+  const validEvents = events.filter(e => 
+    e.location && 
+    typeof e.location === 'object' && 
+    'coordinates' in e.location &&
+    Array.isArray(e.location.coordinates) && 
+    e.location.coordinates.length === 2
+  );
+
+  let center: [number, number] = [33.5731, -7.5898];
+  let zoom = 10;
+
+  if (validEvents.length > 0) {
+    const coordinates = validEvents.map(e => (e.location as any).coordinates);
+    const lats = coordinates.map(coord => coord[1]);
+    const lngs = coordinates.map(coord => coord[0]);
+    
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    
+    center = [(minLat + maxLat) / 2, (minLng + maxLng) / 2];
+    
+    const latDiff = maxLat - minLat;
+    const lngDiff = maxLng - minLng;
+    const maxDiff = Math.max(latDiff, lngDiff);
+    
+    if (maxDiff > 0.1) zoom = 8;
+    else if (maxDiff > 0.05) zoom = 9;
+    else if (maxDiff > 0.02) zoom = 10;
+    else if (maxDiff > 0.01) zoom = 11;
+    else zoom = 12;
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-white mb-8">{title}</h1>
+        <div className="max-w-4xl mx-auto text-center mb-12">
+            <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
+                Découvrez nos événements
+            </h1>
+            <p className="text-xl text-gray-300 mb-8">
+                Cliquez sur un marqueur pour voir les détails d'un événement.
+            </p>
+        </div>
         
-        {events.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-300 text-lg">Aucun événement trouvé.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-            {events.map((event) => {
-              const eventDate = event.dateStart ? new Date(event.dateStart) : null;
-              const isDateInvalid = !eventDate || isNaN(eventDate.getTime());
-              const dayOfMonth = isDateInvalid ? '?' : eventDate.getDate();
-              
-              const reserveButton = (
-                <Button
-                  onClick={() => handleReserveClick(event)}
-                  disabled={reservingEventId === event._id || isDateInvalid}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-2 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {reservingEventId === event._id ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : null}
-                  Réserver
-                </Button>
-              );
-
-              return (
-                <Card key={event._id} className="bg-gray-900/80 backdrop-blur-sm rounded-2xl overflow-hidden border border-gray-700 hover:border-purple-500 transition-all duration-300">
-                  <CardHeader>
-                    <CardTitle>{event.title}</CardTitle>
-                    <CardDescription>
-                      {event.dateStart ? new Date(event.dateStart).toLocaleString() : 'Date non spécifiée'}
-                    </CardDescription>
-                    <CardDescription>
-                      {event.distance ? `À ${(event.distance / 1000).toFixed(2)} km` : ''}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p>{event.description}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button
-                      onClick={() => handleReserveClick(event)}
-                      disabled={reservingEventId === event._id || isDateInvalid}
-                    >
-                      {reservingEventId === event._id ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : null}
-                      Réserver
-                    </Button>
-                  </CardFooter>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+        <div className="max-w-6xl mx-auto">
+            <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
+                {validEvents.length === 0 ? (
+                <div className="text-center py-12">
+                    <p className="text-gray-300 text-lg">Aucun événement avec une localisation valide trouvé.</p>
+                </div>
+                ) : (
+                <MapContainer center={center} zoom={zoom} style={{ height: '500px', width: '100%' }}>
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                    {validEvents.map((event) => {
+                        const customIcon = createEventIcon();
+                        const coordinates = (event.location as any).coordinates;
+                        
+                        return (
+                        <Marker
+                            key={event.id || event._id}
+                            position={[coordinates[1], coordinates[0]] as [number, number]}
+                            icon={customIcon}
+                        >
+                            <Popup>
+                            <div className="event-popup" style={{ minWidth: '200px' }}>
+                                <div style={{ 
+                                backgroundColor: '#3498db', 
+                                color: 'white', 
+                                padding: '8px', 
+                                borderRadius: '4px', 
+                                marginBottom: '8px',
+                                textAlign: 'center'
+                                }}>
+                                <strong>{event.title}</strong>
+                                </div>
+                                <div style={{ marginBottom: '8px' }}>
+                                <div><strong>Date:</strong> {new Date(event.dateStart).toLocaleDateString('fr-FR')}</div>
+                                <div><strong>Prix:</strong> {event.price} MAD</div>
+                                </div>
+                                <button 
+                                onClick={() => handleSelectEvent(event)} 
+                                style={{
+                                    backgroundColor: '#3498db',
+                                    color: 'white',
+                                    border: 'none',
+                                    padding: '8px 16px',
+                                    borderRadius: '4px',
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    fontWeight: 'bold'
+                                }}
+                                >
+                                Voir les détails
+                                </button>
+                            </div>
+                            </Popup>
+                        </Marker>
+                        );
+                    })}
+                </MapContainer>
+                )}
+            </div>
+        </div>
       </div>
     </div>
   );

@@ -38,4 +38,14 @@ export class EventService {
       throw new Error('Erreur lors de la récupération des événements à proximité.');
     }
   }
+
+  static async getEventById(id: string): Promise<Event> {
+    try {
+      const response = await ApiService.get<{ event: Event }>(`/events/${id}`);
+      return response.event;
+    } catch (error) {
+      console.error(`Get event by ID ${id} error:`, error);
+      throw new Error("Erreur lors de la récupération de l'événement.");
+    }
+  }
 } 
