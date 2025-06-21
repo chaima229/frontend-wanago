@@ -28,6 +28,10 @@ import AdminUsers from "./pages/admin/Users";
 import AdminReservations from "./pages/admin/Reservations";
 import AdminPayments from "./pages/admin/Payments";
 import Profile from "./pages/Profile";
+import ReservationDetail from "./pages/admin/ReservationDetail";
+import AdminRestaurants from "./pages/admin/Restaurants";
+import AdminEvents from "./pages/admin/Events";
+import RestaurantForm from './pages/admin/RestaurantForm';
 
 const queryClient = new QueryClient();
 
@@ -102,7 +106,12 @@ const App = () => (
                     <Route index element={<AdminDashboard />} />
                     <Route path="users" element={<AdminUsers />} />
                     <Route path="reservations" element={<AdminReservations />} />
+                    <Route path="reservations/:id" element={<ReservationDetail />} />
                     <Route path="payments" element={<AdminPayments />} />
+                    <Route path="restaurants" element={<AdminRestaurants />} />
+                    <Route path="restaurants/new" element={<RestaurantForm />} />
+                    <Route path="restaurants/edit/:id" element={<RestaurantForm />} />
+                    <Route path="events" element={<AdminEvents />} />
                   </Route>
                   <Route path="*" element={<NotFound />} />
                 </Routes>

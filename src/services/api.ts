@@ -1,18 +1,9 @@
+import { getAuth } from 'firebase/auth';
+
 const API_BASE_URL = 'http://localhost:5000/api';
 
 export class ApiService {
   private static baseURL = API_BASE_URL;
-  private static token: string | null = localStorage.getItem('auth_token');
-
-  static setToken(token: string) {
-    this.token = token;
-    localStorage.setItem('auth_token', token);
-  }
-
-  static removeToken() {
-    this.token = null;
-    localStorage.removeItem('auth_token');
-  }
 
   static async request<T>(
     endpoint: string,
@@ -27,8 +18,11 @@ export class ApiService {
       ...customHeaders,
     };
 
-    if (this.token) {
-      headers.Authorization = `Bearer ${this.token}`;
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (user) {
+      const token = await user.getIdToken();
+      headers.Authorization = `Bearer ${token}`;
     }
 
     const config: RequestInit = {
@@ -42,12 +36,17 @@ export class ApiService {
       const response = await fetch(url, config);
       
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
-      console.log(`API Response:`, data);
-      return data;
+      const text = await response.text();
+      // Gérer les réponses vides (ex: 204 No Content)
+      if (text) {
+        return JSON.parse(text);
+      }
+      return {} as T;
+
     } catch (error) {
       console.error(`API Error:`, error);
       throw error;

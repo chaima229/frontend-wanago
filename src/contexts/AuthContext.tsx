@@ -64,12 +64,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       setFirebaseUser(fbUser);
       if (fbUser) {
-        const idToken = await fbUser.getIdToken();
-        ApiService.setToken(idToken);
         const customUser = await fetchUserData(fbUser);
         setUser(customUser);
       } else {
-        ApiService.removeToken();
         setUser(null);
       }
       setLoading(false);

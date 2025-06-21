@@ -2,87 +2,76 @@ import { ApiService } from './api';
 
 export interface GeoJSONPoint {
   type: 'Point';
-  coordinates: [number, number]; // [longitude, latitude]
+  coordinates: [number, number];
 }
+
 export interface Restaurant {
   _id: string;
   name: string;
-  image: string;
+  address: string;
+  ville: string; // 'ville' in some backend parts
+  cuisineType: string;
   description: string;
   location: GeoJSONPoint | string;
-  price?: number; // Rendre optionnel car pas toujours présent
-  priceRange?: string;
-  rating?: number; // Rendre optionnel
-  cuisine: string;
+  photos: string[];
+  videos: string[];
   openingHours: string;
+  priceRange: string;
+  price?: number;
+  amenities: string[];
   ownerId?: string;
-  distance?: number; // Distance in meters from user
+  cancellationPolicy: string;
+  ratings?: number[];
+  distance?: number;
 }
 
 export interface SearchFilters {
   ville?: string;
   date?: string;
   guests?: number;
-  cuisine?: string;
-  priceRange?: [number, number];
 }
 
 export interface RestaurantSearchResponse {
   restaurants: Restaurant[];
   total: number;
-  page: number;
-  limit: number;
 }
 
-export class RestaurantService {
-  static async searchRestaurants(filters: SearchFilters): Promise<RestaurantSearchResponse> {
-    try {
-      const queryParams = new URLSearchParams();
-      
-      if (filters.ville) queryParams.append('ville', filters.ville);
-      if (filters.date) queryParams.append('date', filters.date);
-      if (filters.guests) queryParams.append('guests', filters.guests.toString());
-      if (filters.cuisine) queryParams.append('cuisine', filters.cuisine);
-      if (filters.priceRange) {
-        queryParams.append('minPrice', filters.priceRange[0].toString());
-        queryParams.append('maxPrice', filters.priceRange[1].toString());
-      }
-
-      const endpoint = `/restaurants/search?${queryParams.toString()}`;
-      return await ApiService.get<RestaurantSearchResponse>(endpoint);
-    } catch (error) {
-      console.error('Search restaurants error:', error);
-      throw new Error('Erreur lors de la recherche de restaurants.');
-    }
+class RestaurantServiceImpl {
+  // --- Admin Methods ---
+  async getAllRestaurants(): Promise<Restaurant[]> {
+    return ApiService.get<Restaurant[]>('/restaurants');
   }
 
-  static async getNearbyRestaurants(latitude: number, longitude: number, radius: number = 10000): Promise<Restaurant[]> {
-    try {
-      const endpoint = `/restaurants/nearby?latitude=${latitude}&longitude=${longitude}&radius=${radius}`;
-      const response = await ApiService.get<{ restaurants: Restaurant[] }>(endpoint);
-      return response.restaurants;
-    } catch (error) {
-      console.error('Nearby restaurants error:', error);
-      throw new Error('Erreur lors de la récupération des restaurants à proximité.');
-    }
+  async createRestaurant(data: Partial<Restaurant>): Promise<Restaurant> {
+    return ApiService.post<Restaurant>('/restaurants', data);
   }
 
-  static async getRestaurantById(id: string): Promise<Restaurant> {
-    try {
-      return await ApiService.get<Restaurant>(`/restaurants/${id}`);
-    } catch (error) {
-      console.error('Get restaurant error:', error);
-      throw new Error('Erreur lors de la récupération du restaurant.');
-    }
+  async updateRestaurant(id: string, data: Partial<Restaurant>): Promise<Restaurant> {
+    return ApiService.put<Restaurant>(`/restaurants/${id}`, data);
   }
 
-  static async getAllRestaurants(): Promise<Restaurant[]> {
-    try {
-      const response = await ApiService.get<Restaurant[]>('/restaurants');
-      return response || [];
-    } catch (error) {
-      console.error('Get all restaurants error:', error);
-      throw new Error('Erreur lors de la récupération des restaurants.');
-    }
+  async deleteRestaurant(id: string): Promise<void> {
+    return ApiService.delete<void>(`/restaurants/${id}`);
+  }
+
+  // --- Public Methods ---
+  async searchRestaurants(filters: SearchFilters): Promise<RestaurantSearchResponse> {
+    const queryParams = new URLSearchParams();
+    if (filters.ville) queryParams.append('ville', filters.ville);
+    if (filters.date) queryParams.append('date', filters.date);
+    if (filters.guests) queryParams.append('guests', filters.guests.toString());
+    const endpoint = `/restaurants/search?${queryParams.toString()}`;
+    return ApiService.get<RestaurantSearchResponse>(endpoint);
+  }
+
+  async getNearbyRestaurants(latitude: number, longitude: number): Promise<Restaurant[]> {
+    const endpoint = `/restaurants/nearby?lat=${latitude}&lon=${longitude}`;
+    return ApiService.get<Restaurant[]>(endpoint);
+  }
+  
+  async getRestaurantById(id: string): Promise<Restaurant> {
+    return ApiService.get<Restaurant>(`/restaurants/${id}`);
   }
 }
+
+export const RestaurantService = new RestaurantServiceImpl();

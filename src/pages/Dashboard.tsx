@@ -24,7 +24,7 @@ const Dashboard = () => {
     refetch 
   } = useQuery({
     queryKey: ['userReservations'],
-    queryFn: ReservationService.getUserReservations,
+    queryFn: () => ReservationService.getMyReservations(),
   });
 
   const handleCancelReservation = async (reservationId: string) => {

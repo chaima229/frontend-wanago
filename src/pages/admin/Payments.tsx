@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { PaymentService } from '@/services/paymentService';
+import { PaymentService, Payment } from '@/services/paymentService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2 } from 'lucide-react';
@@ -12,28 +12,12 @@ import {
   PaginationLink, 
   PaginationNext 
 } from '@/components/ui/pagination';
+import { Badge } from '@/components/ui/badge';
 
-// Based on backend data structure
-interface Payment {
-  _id: string;
-  amount: number;
-  currency: string;
-  status: string;
-  user: {
-    fullName: string;
-    email: string;
-  };
-  reservation: {
-    _id: string;
-    itemType: string;
-  };
-  createdAt: string;
-}
-
-const ITEMS_PER_PAGE = 4;
+const ITEMS_PER_PAGE = 5;
 
 const AdminPayments = () => {
-  const { data: payments, isLoading, error } = useQuery<Payment[]>({
+  const { data: payments = [], isLoading, error } = useQuery<Payment[]>({
     queryKey: ['adminPayments'],
     queryFn: PaymentService.getAllPayments,
   });
@@ -48,9 +32,23 @@ const AdminPayments = () => {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'paid':
+      case 'succeeded':
+        return <Badge className="bg-green-500 text-white">Payé</Badge>;
+      case 'pending':
+        return <Badge className="bg-yellow-500 text-white">En attente</Badge>;
+      case 'failed':
+        return <Badge variant="destructive">Échoué</Badge>;
+      default:
+        return <Badge variant="secondary">{status}</Badge>;
+    }
+  };
+
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="w-full max-w-4xl">
+      <div className="w-full max-w-6xl">
         <h1 className="text-3xl font-bold text-foreground mb-6">Gestion des paiements</h1>
         <Card>
           <CardHeader className="text-center">
@@ -72,16 +70,18 @@ const AdminPayments = () => {
                     <TableRow>
                       <TableHead>Utilisateur</TableHead>
                       <TableHead>Montant</TableHead>
-                      <TableHead>Statut</TableHead>
+                      <TableHead className="text-center">Statut</TableHead>
+                      <TableHead>Méthode</TableHead>
                       <TableHead>Date</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedPayments?.map(payment => (
                       <TableRow key={payment._id}>
-                        <TableCell>{payment.user?.fullName || 'N/A'}</TableCell>
-                        <TableCell>{payment.amount} {payment.currency}</TableCell>
-                        <TableCell>{payment.status}</TableCell>
+                        <TableCell>{payment.userFullName || 'N/A'}</TableCell>
+                        <TableCell>{payment.amount} {payment.currency.toUpperCase()}</TableCell>
+                        <TableCell className="text-center">{getStatusBadge(payment.status)}</TableCell>
+                        <TableCell>{payment.paymentMethod}</TableCell>
                         <TableCell>{new Date(payment.createdAt).toLocaleDateString()}</TableCell>
                       </TableRow>
                     ))}

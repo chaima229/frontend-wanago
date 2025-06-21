@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LayoutGrid, UsersRound, CalendarCheck2, Wallet } from 'lucide-react';
+import { LayoutGrid, UsersRound, CalendarCheck2, Wallet, UtensilsCrossed, Calendar } from 'lucide-react';
 
 const baseLinkClasses = "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8";
 const activeLinkClasses = "text-primary";
@@ -48,6 +48,24 @@ const AdminLayout = () => {
                   </NavLink>
                 </TooltipTrigger>
                 <TooltipContent side="right">Paiements</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <NavLink to="/admin/restaurants" end className={({ isActive }) => `${baseLinkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}>
+                    <UtensilsCrossed className="h-5 w-5" />
+                    <span className="sr-only">Restaurants</span>
+                  </NavLink>
+                </TooltipTrigger>
+                <TooltipContent side="right">Restaurants</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <NavLink to="/admin/events" end className={({ isActive }) => `${baseLinkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}>
+                    <Calendar className="h-5 w-5" />
+                    <span className="sr-only">Événements</span>
+                  </NavLink>
+                </TooltipTrigger>
+                <TooltipContent side="right">Événements</TooltipContent>
               </Tooltip>
             </TooltipProvider>
         </nav>
