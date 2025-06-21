@@ -1,6 +1,7 @@
 import { ApiService } from './api';
+import { getAuth } from 'firebase/auth';
 
-export interface UserData {
+export interface User {
   _id: string;
   fullName: string;
   email: string;
@@ -8,35 +9,43 @@ export interface UserData {
   uid: string;
 }
 
-export class UserService {
-  static async getUserByUid(uid: string): Promise<UserData | null> {
+class UserServiceImpl {
+  private api: ApiService;
+
+  constructor() {
+    this.api = new ApiService();
+  }
+
+  async getAllUsers(): Promise<User[]> {
+    const response = await ApiService.get<User[]>('/users');
+    return response || [];
+  }
+
+  async updateUser(userId: string, data: Partial<User>): Promise<User> {
+    const response = await ApiService.put<User>(`/users/${userId}`, data);
+    return response;
+  }
+
+  async toggleUserValidation(userId: string): Promise<User> {
+    const response = await ApiService.patch<User>(`/users/${userId}/toggle-validation`, {});
+    return response;
+  }
+
+  async getUserByUid(uid: string): Promise<User | null> {
     try {
-      const response = await ApiService.get<UserData>(`/users/uid/${uid}`);
-      return response;
+      const user = await ApiService.get<User>(`/users/uid/${uid}`);
+      return user;
     } catch (error) {
-      console.error('Error fetching user by UID:', error);
+      console.error(`Error fetching user by UID ${uid}:`, error);
+      // Retourner null si l'utilisateur n'est pas trouvé (erreur 404) ou autre erreur
       return null;
     }
   }
 
-  static async getAllUsers(): Promise<UserData[]> {
-    try {
-      const response = await ApiService.get<UserData[]>('/users');
-      return response;
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      return [];
-    }
+  async getUserById(id: string): Promise<User> {
+    const response = await ApiService.get<User>(`/users/${id}`);
+    return response;
   }
+}
 
-  static async updateUser(id: string, data: Partial<UserData>): Promise<UserData | null> {
-    try {
-      // Note: The backend route might expect the database _id, not the firebase uid
-      const response = await ApiService.put<UserData>(`/users/${id}`, data);
-      return response;
-    } catch (error) {
-      console.error('Error updating user:', error);
-      return null;
-    }
-  }
-} 
+export const UserService = new UserServiceImpl(); 

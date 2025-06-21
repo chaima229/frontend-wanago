@@ -2,8 +2,9 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { FirebaseAuthService, User } from '../services/firebaseAuthService';
-import { UserService, UserData } from '../services/userService';
+import { UserService } from '../services/userService';
 import { useToast } from '@/hooks/use-toast';
+import { ApiService } from '@/services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -63,9 +64,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       setFirebaseUser(fbUser);
       if (fbUser) {
+        const idToken = await fbUser.getIdToken();
+        ApiService.setToken(idToken);
         const customUser = await fetchUserData(fbUser);
         setUser(customUser);
       } else {
+        ApiService.removeToken();
         setUser(null);
       }
       setLoading(false);

@@ -33,71 +33,73 @@ const AdminReservations = () => {
   };
 
   return (
-    <div>
-      <h1 className="text-3xl font-bold text-foreground mb-6">Gestion des réservations</h1>
-      <Card>
-        <CardHeader>
-          <CardTitle>Toutes les réservations</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center items-center py-10">
-              <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-          ) : error ? (
-            <div className="text-destructive text-center py-10">
-              Erreur lors du chargement des réservations.
-            </div>
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Événement</TableHead>
-                    <TableHead>Utilisateur</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedReservations?.map(reservation => (
-                    <TableRow key={reservation._id}>
-                      <TableCell>{reservation.event?.title || 'N/A'}</TableCell>
-                      <TableCell>{reservation.customerInfo.fullName || 'N/A'}</TableCell>
-                      <TableCell>{new Date(reservation.date).toLocaleDateString()}</TableCell>
-                      <TableCell>{reservation.status}</TableCell>
-                      <TableCell>
-                        <Button variant="link">Détails</Button>
-                      </TableCell>
+    <div className="flex flex-col items-center w-full">
+      <div className="w-full max-w-4xl">
+        <h1 className="text-3xl font-bold text-foreground mb-6">Gestion des réservations</h1>
+        <Card>
+          <CardHeader className="text-center">
+            <CardTitle>Toutes les réservations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <div className="flex justify-center items-center py-10">
+                <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="text-destructive text-center py-10">
+                Erreur lors du chargement des réservations.
+              </div>
+            ) : (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Événement</TableHead>
+                      <TableHead>Utilisateur</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <Pagination className="mt-6">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
-                  </PaginationItem>
-                  {[...Array(totalPages)].map((_, i) => (
-                    <PaginationItem key={i}>
-                      <PaginationLink 
-                        isActive={i + 1 === currentPage}
-                        onClick={() => handlePageChange(i + 1)}
-                      >
-                        {i + 1}
-                      </PaginationLink>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedReservations?.map(reservation => (
+                      <TableRow key={reservation._id}>
+                        <TableCell>{reservation.event?.title || 'N/A'}</TableCell>
+                        <TableCell>{reservation.customerInfo.fullName || 'N/A'}</TableCell>
+                        <TableCell>{new Date(reservation.date).toLocaleDateString()}</TableCell>
+                        <TableCell>{reservation.status}</TableCell>
+                        <TableCell>
+                          <Button variant="link">Détails</Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <Pagination className="mt-6">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} />
                     </PaginationItem>
-                  ))}
-                  <PaginationItem>
-                    <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </>
-          )}
-        </CardContent>
-      </Card>
+                    {[...Array(totalPages)].map((_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink 
+                          isActive={i + 1 === currentPage}
+                          onClick={() => handlePageChange(i + 1)}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    <PaginationItem>
+                      <PaginationNext onClick={() => handlePageChange(currentPage + 1)} />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
