@@ -212,4 +212,21 @@ export class ReservationService {
       throw new Error('Erreur lors de l\'annulation de la réservation.');
     }
   }
+
+  static async getAllReservations(): Promise<Reservation[]> {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error('Authentification administrateur requise');
+
+      const idToken = await user.getIdToken();
+      const headers = { 'Authorization': `Bearer ${idToken}` };
+      
+      const response = await ApiService.get<Reservation[]>('/reservations', headers);
+      return response || [];
+    } catch (error) {
+      console.error('Error fetching all reservations:', error);
+      throw new Error('Erreur lors de la récupération de toutes les réservations.');
+    }
+  }
 }

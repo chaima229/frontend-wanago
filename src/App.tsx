@@ -2,10 +2,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ReservationProvider } from "./contexts/ReservationContext";
-import { ThemeProvider } from "./contexts/ThemeContext"; // Importer le ThemeProvider
+import { ThemeProvider } from "./contexts/ThemeContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -16,7 +16,7 @@ import Reservation from "./pages/Reservation";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
 import Events from "./pages/Events";
-import EventDetail from "./pages/EventDetail"; // Importer le nouveau composant
+import EventDetail from "./pages/EventDetail";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Confirmation from "./pages/Confirmation";
@@ -40,14 +40,14 @@ const App = () => (
         <AuthProvider>
           <ReservationProvider>
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-              <div className="min-h-screen bg-background"> {/* Utiliser bg-background */}
+              <div className="min-h-screen bg-background">
                 <Navbar />
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/login" element={<Login />} />
                   <Route path="/events" element={<Events />} />
-                  <Route path="/events/:id" element={<EventDetail />} /> {/* Ajouter la nouvelle route */}
+                  <Route path="/events/:id" element={<EventDetail />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/contact" element={<Contact />} />
                   <Route path="/validation" element={<Validation />} />
@@ -115,5 +115,4 @@ const App = () => (
   </QueryClientProvider>
 );
 
-// Force re-evaluation by bundler
 export default App;

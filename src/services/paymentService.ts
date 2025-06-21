@@ -93,4 +93,21 @@ export class PaymentService {
       throw new Error('Erreur lors de la récupération du statut du paiement.');
     }
   }
+
+  static async getAllPayments(): Promise<any[]> {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (!user) throw new Error('Authentification administrateur requise');
+
+      const idToken = await user.getIdToken();
+      const headers = { 'Authorization': `Bearer ${idToken}` };
+      
+      const response = await ApiService.get<any[]>('/payments', headers);
+      return response || [];
+    } catch (error) {
+      console.error('Error fetching all payments:', error);
+      throw new Error('Erreur lors de la récupération de tous les paiements.');
+    }
+  }
 } 

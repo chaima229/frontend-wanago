@@ -68,8 +68,8 @@ module.exports = {
 					foreground: "hsl(0, 0%, 100%)",
 				},
 				"active-link": {
-					DEFAULT: "#B5A957",
-					foreground: "hsl(0, 0%, 0%)",
+					DEFAULT: "#8857b5",
+					foreground: "hsl(297, 57.00%, 23.70%)",
 				},
                 custom: {
                     DEFAULT: "#375BEB",
