@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,13 +13,19 @@ import Login from "./pages/Login";
 import Restaurants from "./pages/Restaurants";
 import Reservation from "./pages/Reservation";
 import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/admin/Dashboard";
 import Events from "./pages/Events";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Confirmation from "./pages/Confirmation";
 import NotFound from "./pages/NotFound";
 import Validation from "./pages/Validation";
+import RequireAdmin from "./components/RequireAdmin";
+import AdminLayout from "./pages/admin/AdminLayout";
+import AdminUsers from "./pages/admin/Users";
+import AdminReservations from "./pages/admin/Reservations";
+import AdminPayments from "./pages/admin/Payments";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
@@ -74,6 +79,27 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Profile />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <RequireAdmin>
+                      <AdminLayout />
+                    </RequireAdmin>
+                  }
+                >
+                  <Route index element={<AdminDashboard />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route path="reservations" element={<AdminReservations />} />
+                  <Route path="payments" element={<AdminPayments />} />
+                </Route>
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>

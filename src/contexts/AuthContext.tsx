@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { FirebaseAuthService, User } from '../services/firebaseAuthService';
+import { UserService, UserData } from '../services/userService';
 
 interface AuthContextType {
   user: User | null;
@@ -32,11 +33,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAuthenticated = !!user;
 
+  // Fonction pour récupérer les données utilisateur depuis la base
+  const fetchUserData = async (firebaseUser: FirebaseUser) => {
+    try {
+      const userData = await UserService.getUserByUid(firebaseUser.uid);
+      if (userData) {
+        return {
+          id: firebaseUser.uid,
+          _id: userData._id, // Ajout de l'ID de la base de données
+          fullName: userData.fullName,
+          email: firebaseUser.email!,
+          role: userData.role
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
+    
+    // Fallback si pas de données en base
+    const fallbackUser = FirebaseAuthService.convertFirebaseUser(firebaseUser);
+    return {
+      ...fallbackUser,
+      role: 'user' // Rôle par défaut
+    };
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (fbUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
       setFirebaseUser(fbUser);
       if (fbUser) {
-        const customUser = FirebaseAuthService.convertFirebaseUser(fbUser);
+        const customUser = await fetchUserData(fbUser);
         setUser(customUser);
       } else {
         setUser(null);

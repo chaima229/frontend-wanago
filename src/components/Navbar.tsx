@@ -3,6 +3,16 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { useRole } from '@/hooks/use-role';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { User as UserIcon } from 'lucide-react';
 
 const Navbar = () => {
   const location = useLocation();
@@ -16,10 +26,9 @@ const Navbar = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
-  // Add dashboard for authenticated users
-  const authenticatedNavItems = isAuthenticated 
-    ? [...navItems, { name: 'Dashboard', path: '/dashboard' }]
-    : navItems;
+  const getInitials = (name: string) => {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+  }
 
   return (
     <nav className="bg-gray-900/95 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
@@ -30,7 +39,7 @@ const Navbar = () => {
               RestaurantGo
             </Link>
             <div className="hidden md:flex space-x-6">
-              {authenticatedNavItems.map((item) => (
+              {navItems.map((item) => (
                 <Link
                   key={item.name}
                   to={item.path}
@@ -47,29 +56,45 @@ const Navbar = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            {isAdmin && (
-              <Link to="/admin-dashboard">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="bg-purple-700 text-white hover:bg-purple-800"
-                >
-                  Admin Dashboard
-                </Button>
-              </Link>
-            )}
             {isAuthenticated ? (
-              <>
-                <span className="text-gray-300 text-sm">Welcome, {user?.fullName}</span>
-                <Button
-                  onClick={logout}
-                  variant="outline"
-                  size="sm"
-                  className="border-gray-600 text-gray-300 hover:bg-gray-800"
-                >
-                  Logout
-                </Button>
-              </>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src="" alt={user?.fullName} />
+                      <AvatarFallback>
+                        {user?.fullName ? getInitials(user.fullName) : <UserIcon size={20} />}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">{user?.fullName}</p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/dashboard">Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile">Profil</Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin">Admin</Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <Link to="/login">
                 <Button variant="outline" size="sm" className="border-gray-600 text-gray-300 hover:bg-gray-800">

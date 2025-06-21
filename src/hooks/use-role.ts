@@ -1,27 +1,13 @@
 import { useEffect, useState } from 'react';
-import { getCurrentUserProfile, UserProfile } from '../services/userService';
+import { useAuth } from '../contexts/AuthContext';
 
 export type UserRole = 'user' | 'partner' | 'restaurant' | 'admin';
 
 export const useRole = () => {
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const profile = await getCurrentUserProfile();
-        setUserProfile(profile);
-      } catch (e) {
-        setUserProfile(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchProfile();
-  }, []);
-
-  const userRole: UserRole = (userProfile?.role as UserRole) || 'user';
+  const userRole: UserRole = (user?.role as UserRole) || 'user';
 
   const isAdmin = userRole === 'admin';
   const isPartner = userRole === 'partner';
@@ -41,6 +27,6 @@ export const useRole = () => {
     isUser,
     hasPermission,
     isLoading,
-    userProfile
+    userProfile: user
   };
 }; 

@@ -1,4 +1,3 @@
-
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
@@ -7,14 +6,19 @@ import {
   updateProfile,
   GoogleAuthProvider,
   FacebookAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 
 export interface User {
-  id: string;
+  id: string; // Firebase UID
+  _id?: string; // MongoDB ID
   fullName: string;
   email: string;
+  role?: string; // Ajouter le rôle optionnel
 }
 
 export class FirebaseAuthService {
@@ -103,5 +107,27 @@ export class FirebaseAuthService {
       fullName: firebaseUser.displayName || 'User',
       email: firebaseUser.email!
     };
+  }
+
+  static async changePassword(currentPassword, newPassword) {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("Aucun utilisateur n'est connecté.");
+    }
+
+    try {
+      const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      // Ré-authentifier l'utilisateur
+      await reauthenticateWithCredential(user, credential);
+      // Mettre à jour le mot de passe
+      await updatePassword(user, newPassword);
+    } catch (error) {
+      console.error("Erreur lors du changement de mot de passe:", error);
+      // Gérer les erreurs communes
+      if (error.code === 'auth/wrong-password') {
+        throw new Error("Le mot de passe actuel est incorrect.");
+      }
+      throw new Error("Une erreur est survenue lors du changement de mot de passe.");
+    }
   }
 }
