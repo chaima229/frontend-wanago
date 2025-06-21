@@ -61,36 +61,36 @@ const Contact = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h1 className="text-5xl font-bold text-white mb-6">Contactez-nous</h1>
-            <p className="text-xl text-gray-300">
+            <h1 className="text-5xl font-bold text-foreground mb-6">Contactez-nous</h1>
+            <p className="text-xl text-muted-foreground">
               Nous sommes là pour vous aider. N'hésitez pas à nous contacter !
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
             {contactInfo.map((info, index) => (
-              <div key={index} className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700 text-center">
+              <div key={index} className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 border text-center">
                 <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                   <info.icon className="w-8 h-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">{info.title}</h3>
-                <p className="text-purple-400 font-medium mb-1">{info.info}</p>
-                <p className="text-gray-400 text-sm">{info.description}</p>
+                <h3 className="text-xl font-bold text-foreground mb-2">{info.title}</h3>
+                <p className="text-primary font-medium mb-1">{info.info}</p>
+                <p className="text-muted-foreground text-sm">{info.description}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center">Envoyez-nous un message</h2>
+          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border">
+            <h2 className="text-3xl font-bold text-foreground mb-8 text-center">Envoyez-nous un message</h2>
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
                     Nom complet *
                   </label>
                   <Input
@@ -100,11 +100,10 @@ const Contact = () => {
                     onChange={handleInputChange}
                     placeholder="Votre nom"
                     required
-                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-foreground mb-2">
                     Email *
                   </label>
                   <Input
@@ -114,13 +113,12 @@ const Contact = () => {
                     onChange={handleInputChange}
                     placeholder="votre@email.com"
                     required
-                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Sujet *
                 </label>
                 <Input
@@ -130,12 +128,11 @@ const Contact = () => {
                   onChange={handleInputChange}
                   placeholder="Sujet de votre message"
                   required
-                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-foreground mb-2">
                   Message *
                 </label>
                 <Textarea
@@ -145,7 +142,6 @@ const Contact = () => {
                   placeholder="Votre message..."
                   required
                   rows={6}
-                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
                 />
               </div>
 

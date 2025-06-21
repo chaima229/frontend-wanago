@@ -1,6 +1,7 @@
-import type { Config } from "tailwindcss";
+import { type Config } from "tailwindcss"
 
-export default {
+/** @type {import('tailwindcss').Config} */
+module.exports = {
 	darkMode: ["class"],
 	content: [
 		"./pages/**/*.{ts,tsx}",
@@ -61,7 +62,11 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				purple: {
+					DEFAULT: "hsl(250, 69%, 61%)",
+					foreground: "hsl(0, 0%, 100%)",
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

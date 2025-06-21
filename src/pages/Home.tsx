@@ -42,32 +42,32 @@ const Home = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-4" />
-          <p className="text-white">Chargement des restaurants...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-foreground">Chargement des restaurants...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-4xl mx-auto text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
+          <h1 className="text-5xl font-bold text-foreground mb-6 leading-tight">
             Découvrez et réservez
           </h1>
-          <p className="text-xl text-gray-300 mb-8">
+          <p className="text-xl text-muted-foreground mb-8">
             Sélectionnez un restaurant sur la carte pour commencer votre réservation.
           </p>
         </div>
 
         <div className="max-w-6xl mx-auto">
-          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
+          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border">
             {!restaurants || restaurants.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-300 text-lg">Aucun restaurant disponible pour le moment.</p>
+                <p className="text-muted-foreground text-lg">Aucun restaurant disponible pour le moment.</p>
               </div>
             ) : (
               <RestaurantMap restaurants={restaurants} onSelect={handleSelectRestaurant} />

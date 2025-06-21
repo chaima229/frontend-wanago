@@ -140,12 +140,12 @@ const Reservation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white text-lg font-medium">Finaliser votre réservation</h2>
+            <h2 className="text-foreground text-lg font-medium">Finaliser votre réservation</h2>
           </div>
           <div className="w-full bg-gray-700 rounded-full h-2">
             <div 
@@ -157,15 +157,15 @@ const Reservation = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Restaurant Info */}
-          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 border border">
             <div className="flex items-center mb-4">
               <button
                 onClick={handleCancel}
-                className="mr-4 p-2 text-gray-400 hover:text-white transition-colors"
+                className="mr-4 p-2 text-muted-foreground hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-5 h-5" />
               </button>
-              <h3 className="text-xl font-bold text-white">Détails de la réservation</h3>
+              <h3 className="text-xl font-bold text-foreground">Détails de la réservation</h3>
             </div>
 
             <div className="aspect-video mb-4 rounded-lg overflow-hidden">
@@ -176,44 +176,44 @@ const Reservation = () => {
               />
             </div>
 
-            <h4 className="text-lg font-bold text-white mb-2">
+            <h4 className="text-lg font-bold text-foreground mb-2">
               {reservationData.restaurant.name}
             </h4>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-muted-foreground text-sm mb-4">
               {reservationData.restaurant.description}
             </p>
-            <p className="text-gray-300 mb-4">
+            <p className="text-muted-foreground mb-4">
               {reservationData.restaurant.address}, {reservationData.restaurant.ville}
             </p>
 
-            <div className="border-t border-gray-700 pt-4 space-y-2">
+            <div className="border-t border pt-4 space-y-2">
               {reservationData.date && (
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Date:</span>
-                  <span className="text-white">
+                  <span className="text-muted-foreground">Date:</span>
+                  <span className="text-foreground">
                     {new Date(reservationData.date).toLocaleDateString('fr-FR')}
                   </span>
                 </div>
               )}
               {reservationData.guests && (
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Personnes:</span>
-                  <span className="text-white">{reservationData.guests}</span>
+                  <span className="text-muted-foreground">Personnes:</span>
+                  <span className="text-foreground">{reservationData.guests}</span>
                 </div>
               )}
               {selectedTime && (
                 <div className="flex justify-between">
-                  <span className="text-gray-400">Heure:</span>
-                  <span className="text-white">{selectedTime}</span>
+                  <span className="text-muted-foreground">Heure:</span>
+                  <span className="text-foreground">{selectedTime}</span>
                 </div>
               )}
               <div className="flex justify-between items-center pt-2 border-t border-gray-600">
-                <span className="text-gray-400">Prix par personne:</span>
+                <span className="text-muted-foreground">Prix par personne:</span>
                 <span className="text-blue-400 font-bold">
                   {reservationData.restaurant.price} MAD
                 </span>
               </div>
-              <div className="flex justify-between items-center text-lg font-bold text-white">
+              <div className="flex justify-between items-center text-lg font-bold text-foreground">
                 <span>Total:</span>
                 <span className="text-blue-400">
                   {(reservationData.restaurant.price * (reservationData.guests || 1))} MAD
@@ -223,9 +223,9 @@ const Reservation = () => {
           </div>
 
           {/* Reservation Form */}
-          <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-6 border border-gray-700">
+          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-6 border border">
             <form onSubmit={handleSubmit} className="space-y-6">
-              <h4 className="text-lg font-bold text-white mb-4">Informations de réservation</h4>
+              <h4 className="text-lg font-bold text-foreground mb-4">Informations de réservation</h4>
 
               {/* Date Selection */}
               <div>
@@ -238,7 +238,7 @@ const Reservation = () => {
 
               {/* Time Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-muted-foreground mb-3">
                   Sélectionnez votre heure *
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -249,8 +249,8 @@ const Reservation = () => {
                       onClick={() => handleTimeSelect(time)}
                       className={`p-2 rounded-lg border transition-colors ${
                         selectedTime === time
-                          ? 'bg-purple-600 border-purple-500 text-white'
-                          : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-purple-500'
+                          ? 'bg-purple-600 border-purple-500 text-foreground'
+                          : 'bg-gray-800 border-gray-600 text-muted-foreground hover:border-purple-500'
                       }`}
                     >
                       {time}
@@ -261,7 +261,7 @@ const Reservation = () => {
 
               {/* Number of Guests Selection */}
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-3">
+                <label className="block text-sm font-medium text-muted-foreground mb-3">
                   Nombre de personnes *
                 </label>
                 <div className="grid grid-cols-4 gap-2">
@@ -272,8 +272,8 @@ const Reservation = () => {
                       onClick={() => updateReservation({ guests: num })}
                       className={`p-3 rounded-lg border transition-colors ${
                         reservationData.guests === num
-                          ? 'bg-purple-600 border-purple-500 text-white'
-                          : 'bg-gray-800 border-gray-600 text-gray-300 hover:border-purple-500'
+                          ? 'bg-purple-600 border-purple-500 text-foreground'
+                          : 'bg-gray-800 border-gray-600 text-muted-foreground hover:border-purple-500'
                       }`}
                     >
                       {num} {num === 1 ? 'personne' : 'personnes'}
@@ -282,10 +282,10 @@ const Reservation = () => {
                 </div>
               </div>
 
-              <h5 className="text-md font-bold text-white">Vos informations</h5>
+              <h5 className="text-md font-bold text-foreground">Vos informations</h5>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Nom complet *
                 </label>
                 <Input
@@ -295,12 +295,12 @@ const Reservation = () => {
                   onChange={handleInputChange}
                   placeholder="Votre nom complet"
                   required
-                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                  className="bg-gray-800 border-gray-600 text-foreground placeholder-gray-400 focus:border-purple-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Email *
                 </label>
                 <Input
@@ -310,16 +310,16 @@ const Reservation = () => {
                   onChange={handleInputChange}
                   placeholder="Email"
                   required
-                  className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500"
+                  className="bg-gray-800 border-gray-600 text-foreground placeholder-gray-400 focus:border-purple-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Téléphone *
                 </label>
                 <div className="flex">
-                  <div className="bg-gray-800 border border-gray-600 rounded-l-md px-3 py-2 text-white text-sm">
+                  <div className="bg-gray-800 border border-gray-600 rounded-l-md px-3 py-2 text-foreground text-sm">
                     +212
                   </div>
                   <Input
@@ -329,7 +329,7 @@ const Reservation = () => {
                     onChange={handleInputChange}
                     placeholder="Numéro de téléphone"
                     required
-                    className="bg-gray-800 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500 rounded-l-none border-l-0"
+                    className="bg-gray-800 border-gray-600 text-foreground placeholder-gray-400 focus:border-purple-500 rounded-l-none border-l-0"
                   />
                 </div>
               </div>
@@ -337,7 +337,7 @@ const Reservation = () => {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-foreground py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50"
               >
                 {loading ? 'Création en cours...' : 'Confirmer la réservation'}
               </Button>

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ReservationProvider } from "./contexts/ReservationContext";
+import { ThemeProvider } from "./contexts/ThemeContext"; // Importer le ThemeProvider
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -38,73 +39,75 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <ReservationProvider>
-            <div className="min-h-screen bg-gray-900">
-              <Navbar />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/events/:id" element={<EventDetail />} /> {/* Ajouter la nouvelle route */}
-                <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/validation" element={<Validation />} />
-                <Route
-                  path="/restaurants"
-                  element={
-                    <ProtectedRoute>
-                      <Restaurants />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/reservation"
-                  element={
-                    <ProtectedRoute>
-                      <Reservation />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/confirmation"
-                  element={
-                    <ProtectedRoute>
-                      <Confirmation />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/profile"
-                  element={
-                    <ProtectedRoute>
-                      <Profile />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin"
-                  element={
-                    <RequireAdmin>
-                      <AdminLayout />
-                    </RequireAdmin>
-                  }
-                >
-                  <Route index element={<AdminDashboard />} />
-                  <Route path="users" element={<AdminUsers />} />
-                  <Route path="reservations" element={<AdminReservations />} />
-                  <Route path="payments" element={<AdminPayments />} />
-                </Route>
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </div>
+            <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+              <div className="min-h-screen bg-background"> {/* Utiliser bg-background */}
+                <Navbar />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/events" element={<Events />} />
+                  <Route path="/events/:id" element={<EventDetail />} /> {/* Ajouter la nouvelle route */}
+                  <Route path="/about" element={<About />} />
+                  <Route path="/contact" element={<Contact />} />
+                  <Route path="/validation" element={<Validation />} />
+                  <Route
+                    path="/restaurants"
+                    element={
+                      <ProtectedRoute>
+                        <Restaurants />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/reservation"
+                    element={
+                      <ProtectedRoute>
+                        <Reservation />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/confirmation"
+                    element={
+                      <ProtectedRoute>
+                        <Confirmation />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/profile"
+                    element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin"
+                    element={
+                      <RequireAdmin>
+                        <AdminLayout />
+                      </RequireAdmin>
+                    }
+                  >
+                    <Route index element={<AdminDashboard />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="reservations" element={<AdminReservations />} />
+                    <Route path="payments" element={<AdminPayments />} />
+                  </Route>
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+            </ThemeProvider>
           </ReservationProvider>
         </AuthProvider>
       </BrowserRouter>

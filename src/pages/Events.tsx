@@ -73,10 +73,10 @@ const Events = () => {
 
   if (pageLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-400 mx-auto mb-4" />
-          <p className="text-white">Chargement des événements...</p>
+          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-foreground">Chargement des événements...</p>
         </div>
       </div>
     );
@@ -119,22 +119,22 @@ const Events = () => {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto text-center mb-12">
-            <h1 className="text-5xl font-bold text-white mb-6 leading-tight">
+            <h1 className="text-5xl font-bold text-foreground mb-6 leading-tight">
                 Découvrez nos événements
             </h1>
-            <p className="text-xl text-gray-300 mb-8">
+            <p className="text-xl text-muted-foreground mb-8">
                 Cliquez sur un marqueur pour voir les détails d'un événement.
             </p>
         </div>
         
         <div className="max-w-6xl mx-auto">
-            <div className="bg-gray-900/80 backdrop-blur-sm rounded-2xl p-8 border border-gray-700">
+            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border">
                 {validEvents.length === 0 ? (
                 <div className="text-center py-12">
-                    <p className="text-gray-300 text-lg">Aucun événement avec une localisation valide trouvé.</p>
+                    <p className="text-muted-foreground text-lg">Aucun événement avec une localisation valide trouvé.</p>
                 </div>
                 ) : (
                 <MapContainer center={center} zoom={zoom} style={{ height: '500px', width: '100%' }}>
