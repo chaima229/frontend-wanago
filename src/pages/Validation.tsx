@@ -74,15 +74,15 @@ const Validation = () => {
   
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground">
       <img
-        src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg"
-        alt="Logo"
-        className="w-20 mb-6"
+        src="/wanaGO.webp"
+        alt="WanaGO Logo"
+        className="w-32 mb-6"
       />
-      <h2 className="text-3xl font-semibold mb-2">Enter your code</h2>
-      <p className="mb-4 text-gray-400">
-        We sent a security code to <span className="font-bold">your email</span>.
+      <h2 className="text-3xl font-semibold mb-2">Entrez votre code</h2>
+      <p className="mb-4 text-muted-foreground">
+        Nous avons envoyé un code de sécurité à <span className="font-bold text-foreground">votre email</span>.
       </p>
       
       <form onSubmit={handleSubmit} className="flex flex-col items-center w-full max-w-xs">
@@ -94,7 +94,7 @@ const Validation = () => {
               type="text"
               inputMode="numeric"
               maxLength={1}
-              className="w-12 h-12 text-2xl text-center rounded-lg border-2 border-blue-500 bg-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+              className="w-12 h-12 text-2xl text-center rounded-lg border-2 border-primary bg-background focus:outline-none focus:ring-2 focus:ring-ring"
               value={code[idx]}
               onChange={(e) => handleChange(e, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
@@ -106,11 +106,11 @@ const Validation = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-lg font-semibold transition mb-2"
+          className="w-full py-3 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-lg font-semibold transition mb-2"
         >
-          Submit
+          Valider
         </button>
-        {message && <p className="mt-2 text-center text-red-400">{message}</p>}
+        {message && <p className="mt-2 text-center text-destructive">{message}</p>}
       </form>
     </div>
   );

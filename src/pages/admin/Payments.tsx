@@ -1,30 +1,40 @@
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 
 const AdminPayments = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 p-8">
-      <h1 className="text-3xl font-bold text-white mb-6">Gestion des paiements</h1>
-      <div className="bg-gray-800 rounded-lg p-6 text-white">
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className="text-left">ID Paiement</th>
-              <th className="text-left">Montant</th>
-              <th className="text-left">Statut</th>
-              <th className="text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Exemple de ligne */}
-            <tr>
-              <td>PAY-123456</td>
-              <td>200.00 MAD</td>
-              <td>COMPLETED</td>
-              <td><button className="text-blue-400">Détails</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div>
+      <h1 className="text-3xl font-bold text-foreground mb-6">Gestion des paiements</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Tous les paiements</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID Paiement</TableHead>
+                <TableHead>Montant</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* Exemple de ligne */}
+              <TableRow>
+                <TableCell>PAY-123456</TableCell>
+                <TableCell>200.00 MAD</TableCell>
+                <TableCell>COMPLETED</TableCell>
+                <TableCell>
+                  <Button variant="link">Détails</Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

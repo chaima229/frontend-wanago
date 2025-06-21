@@ -67,6 +67,14 @@ module.exports = {
 					DEFAULT: "hsl(250, 69%, 61%)",
 					foreground: "hsl(0, 0%, 100%)",
 				},
+				"active-link": {
+					DEFAULT: "#B5A957",
+					foreground: "hsl(0, 0%, 0%)",
+				},
+                custom: {
+                    DEFAULT: "#375BEB",
+                    foreground: "hsl(0, 0%, 100%)",
+                }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

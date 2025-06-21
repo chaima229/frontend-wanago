@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login, loginWithGoogle, loginWithFacebook } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -68,7 +68,7 @@ const Login = () => {
     }
   };
 
-  const handleFacebookLogin = async () => {
+  /* const handleFacebookLogin = async () => {
     try {
       const success = await loginWithFacebook();
       if (success) {
@@ -85,7 +85,7 @@ const Login = () => {
         variant: 'destructive',
       });
     }
-  };
+  }; */
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -100,46 +100,41 @@ const Login = () => {
       <div 
         className="hidden lg:flex lg:w-1/2 bg-cover bg-center relative"
         style={{
-          backgroundImage: `url('/lovable-uploads/restaurant-bg.jpg')`
+          backgroundImage: `url('/wanaGOO.jpg')`
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-        <div className="relative z-10 flex items-start justify-center pt-8">
-          <div className="text-white text-2xl font-bold flex items-center">
-            <span className="text-red-500 mr-1">📍</span>
-            VanGo
-          </div>
-        </div>
+        
       </div>
 
       {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 bg-gray-900 flex items-center justify-center p-8">
+      <div className="w-full lg:w-1/2 bg-background flex items-center justify-center p-8">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-white mb-2">
-              Log In
+            <h1 className="text-3xl font-bold text-foreground mb-2">
+              Se connecter
             </h1>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                E-mail Address
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Adresse e-mail
               </label>
               <Input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleInputChange}
-                placeholder="anass.akker@vnov.com"
+                placeholder="email@example.com"
                 required
-                className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 h-12"
+                className="bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary h-12"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Password
+              <label className="block text-sm font-medium text-muted-foreground mb-2">
+                Mot de passe
               </label>
               <div className="relative">
                 <Input
@@ -147,14 +142,14 @@ const Login = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  placeholder="Akan2002"
+                  placeholder="********"
                   required
-                  className="bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-red-500 h-12 pr-12"
+                  className="bg-card border-border text-foreground placeholder:text-muted-foreground focus:border-primary h-12 pr-12"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -164,42 +159,42 @@ const Login = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-red-600 hover:bg-red-700 text-white py-3 h-12 rounded-lg font-semibold transition-all duration-200"
+              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-3 h-12 rounded-lg font-semibold transition-all duration-200"
             >
-              {loading ? 'Loading...' : 'Log In'}
+              {loading ? 'Chargement...' : 'Se connecter'}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <Link
               to="/auth"
-              className="text-sm text-gray-400 hover:text-white transition-colors"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              Don't have an account? Create Account
+              Pas encore de compte ? Créez-en un
             </Link>
           </div>
 
           <div className="mt-8 text-center">
-            <div className="text-sm text-gray-400 mb-4">OR</div>
+            <div className="text-sm text-muted-foreground mb-4">OU</div>
             <div className="space-y-3">
               <Button
                 type="button"
                 onClick={handleGoogleLogin}
                 variant="outline"
-                className="w-full bg-white text-gray-900 border-gray-300 hover:bg-gray-50 h-12 flex items-center justify-center gap-3"
+                className="w-full bg-card text-foreground border-border hover:bg-accent h-12 flex items-center justify-center gap-3"
               >
                 <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">G</div>
-                Sign in with Google
+                Se connecter avec Google
               </Button>
-              <Button
+              {/* <Button
                 type="button"
                 onClick={handleFacebookLogin}
                 variant="outline"
                 className="w-full bg-blue-600 text-white border-blue-600 hover:bg-blue-700 h-12 flex items-center justify-center gap-3"
               >
                 <div className="w-5 h-5 bg-white rounded text-blue-600 flex items-center justify-center text-xs font-bold">f</div>
-                Sign in with Facebook
-              </Button>
+                Se connecter avec Facebook
+              </Button> */}
             </div>
           </div>
         </div>

@@ -12,7 +12,7 @@ const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [reserving, setReserving] = useState(false);
@@ -42,16 +42,16 @@ const EventDetail = () => {
   }, [id, toast]);
 
   const handleReserveClick = async () => {
-    if (!user) {
+    if (!isAuthenticated) {
       toast({
         title: "Connexion requise",
         description: "Vous devez être connecté pour réserver.",
         variant: "destructive",
       });
-      navigate('/login');
+      navigate('/auth');
       return;
     }
-    if (!event) return;
+    if (!event || !user) return;
 
     setReserving(true);
     try {
@@ -74,15 +74,15 @@ const EventDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center">
-        <Loader2 className="w-12 h-12 animate-spin text-purple-400" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-12 h-12 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 flex items-center justify-center text-white text-xl">
+      <div className="min-h-screen bg-background flex items-center justify-center text-foreground text-xl">
         Événement non trouvé.
       </div>
     );
@@ -91,7 +91,7 @@ const EventDetail = () => {
   const eventImage = event.photos && event.photos.length > 0 ? event.photos[0] : '/placeholder.svg';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 text-white">
+    <div className="min-h-screen bg-background text-foreground">
         <div className="container mx-auto px-4 py-8">
             <Button onClick={() => navigate('/events')} variant="ghost" className="mb-4">
                 <ArrowLeft className="mr-2 h-4 w-4" />
@@ -99,31 +99,31 @@ const EventDetail = () => {
             </Button>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
-                    <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700">
+                    <Card>
                         <CardHeader className="p-0">
-                            <img src={eventImage} alt={event.title} className="w-full h-96 object-cover rounded-t-2xl" />
+                            <img src={eventImage} alt={event.title} className="w-full h-96 object-cover rounded-t-lg" />
                         </CardHeader>
                         <CardContent className="p-6">
                             <h1 className="text-4xl font-bold mb-4">{event.title}</h1>
-                            <p className="text-gray-300 text-lg">{event.description}</p>
+                            <p className="text-muted-foreground text-lg">{event.description}</p>
                         </CardContent>
                     </Card>
                 </div>
                 <div>
-                    <Card className="bg-gray-900/80 backdrop-blur-sm border-gray-700 p-6">
+                    <Card className="p-6">
                         <CardTitle className="mb-6 text-2xl">Détails de l'événement</CardTitle>
-                        <div className="space-y-4 text-gray-300">
-                            <div className="flex items-center"><Calendar className="w-5 h-5 mr-3 text-purple-400" /> <span>{new Date(event.dateStart).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
-                            <div className="flex items-center"><MapPin className="w-5 h-5 mr-3 text-purple-400" /> <span>{event.address || 'Lieu à définir'}</span></div>
-                            <div className="flex items-center"><Tag className="w-5 h-5 mr-3 text-purple-400" /> <span>{event.category}</span></div>
-                            <div className="flex items-center"><Users className="w-5 h-5 mr-3 text-purple-400" /> <span>{event.capacity} places disponibles</span></div>
+                        <div className="space-y-4 text-muted-foreground">
+                            <div className="flex items-center"><Calendar className="w-5 h-5 mr-3 text-primary" /> <span>{new Date(event.dateStart).toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span></div>
+                            <div className="flex items-center"><MapPin className="w-5 h-5 mr-3 text-primary" /> <span>{event.address || 'Lieu à définir'}</span></div>
+                            <div className="flex items-center"><Tag className="w-5 h-5 mr-3 text-primary" /> <span>{event.category}</span></div>
+                            <div className="flex items-center"><Users className="w-5 h-5 mr-3 text-primary" /> <span>{event.capacity} places disponibles</span></div>
                         </div>
-                        <div className="border-t border-gray-700 my-6"></div>
+                        <div className="border-t my-6"></div>
                         <div className="flex justify-between items-center text-3xl font-bold mb-6">
                             <span>Prix:</span>
-                            <span className="text-purple-400">{event.price} MAD</span>
+                            <span className="text-primary">{event.price} MAD</span>
                         </div>
-                        <Button onClick={handleReserveClick} disabled={reserving} size="lg" className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 transition-all duration-200">
+                        <Button onClick={handleReserveClick} disabled={reserving} size="lg" className="w-full">
                             {reserving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Réserver maintenant
                         </Button>

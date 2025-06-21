@@ -1,30 +1,40 @@
 import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
 
 const AdminReservations = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-purple-900 p-8">
-      <h1 className="text-3xl font-bold text-white mb-6">Gestion des réservations</h1>
-      <div className="bg-gray-800 rounded-lg p-6 text-white">
-        <table className="w-full">
-          <thead>
-            <tr>
-              <th className="text-left">Client</th>
-              <th className="text-left">Date</th>
-              <th className="text-left">Statut</th>
-              <th className="text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {/* Exemple de ligne */}
-            <tr>
-              <td>John Doe</td>
-              <td>2025-06-20</td>
-              <td>confirmée</td>
-              <td><button className="text-blue-400">Voir</button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <div>
+      <h1 className="text-3xl font-bold text-foreground mb-6">Gestion des réservations</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>Toutes les réservations</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Client</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {/* Exemple de ligne */}
+              <TableRow>
+                <TableCell>John Doe</TableCell>
+                <TableCell>2025-06-20</TableCell>
+                <TableCell>confirmée</TableCell>
+                <TableCell>
+                  <Button variant="link">Voir</Button>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 };

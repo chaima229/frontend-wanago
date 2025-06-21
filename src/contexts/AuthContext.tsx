@@ -1,8 +1,9 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { FirebaseAuthService, User } from '../services/firebaseAuthService';
 import { UserService, UserData } from '../services/userService';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
@@ -11,7 +12,6 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (fullName: string, email: string, password: string) => Promise<boolean>;
   loginWithGoogle: () => Promise<boolean>;
-  loginWithFacebook: () => Promise<boolean>;
   logout: () => Promise<void>;
   loading: boolean;
 }
@@ -30,6 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const isAuthenticated = !!user;
 
@@ -73,6 +74,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return () => unsubscribe();
   }, []);
 
+  const logout = useCallback(async (isInactive = false): Promise<void> => {
+    try {
+      setLoading(true);
+      await FirebaseAuthService.logout();
+      if (isInactive) {
+        toast({
+          title: "Session expirée",
+          description: "Vous avez été déconnecté pour inactivité.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [toast]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    let inactivityTimer: NodeJS.Timeout;
+
+    const resetTimer = () => {
+      clearTimeout(inactivityTimer);
+      inactivityTimer = setTimeout(() => {
+        logout(true);
+      }, 3600000); // 1 hour
+    };
+
+    const events = ['mousemove', 'keydown', 'click', 'scroll'];
+    events.forEach(event => window.addEventListener(event, resetTimer));
+
+    resetTimer(); // Start the timer initially
+
+    return () => {
+      clearTimeout(inactivityTimer);
+      events.forEach(event => window.removeEventListener(event, resetTimer));
+    };
+  }, [isAuthenticated, logout]);
+
+
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
       setLoading(true);
@@ -112,30 +155,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const loginWithFacebook = async (): Promise<boolean> => {
-    try {
-      setLoading(true);
-      await FirebaseAuthService.loginWithFacebook();
-      return true;
-    } catch (error) {
-      console.error('Facebook login failed:', error);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const logout = async (): Promise<void> => {
-    try {
-      setLoading(true);
-      await FirebaseAuthService.logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const value = {
     user,
     firebaseUser,
@@ -143,7 +162,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     loginWithGoogle,
-    loginWithFacebook,
     logout,
     loading,
   };

@@ -5,7 +5,6 @@ import {
   User as FirebaseUser,
   updateProfile,
   GoogleAuthProvider,
-  FacebookAuthProvider,
   signInWithPopup,
   updatePassword,
   reauthenticateWithCredential,
