@@ -64,6 +64,11 @@ class ReservationServiceImpl {
     const response = await ApiService.post('/reservations', reservationPayload);
     return response;
   }
+
+  async cancelReservation(reservationId: string): Promise<any> {
+    const response = await ApiService.put(`/reservations/${reservationId}/cancel`, {});
+    return response;
+  }
 }
 
 export const ReservationService = new ReservationServiceImpl();
