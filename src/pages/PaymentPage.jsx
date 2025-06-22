@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { ReservationService } from "../services/reservationService";
+import { PaymentService } from "../services/paymentService";
 // Si tu as des icônes Lucide ou similaires, importe-les ici
-import { Calendar, Clock, Users, MapPin } from 'lucide-react';
+import { Calendar, Clock, Users, MapPin, CreditCard, Shield } from 'lucide-react';
 
 const PaymentPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const params = new URLSearchParams(location.search);
   const reservationId = params.get("reservationId");
 
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
 
   useEffect(() => {
     const fetchReservation = async () => {
@@ -29,6 +33,42 @@ const PaymentPage = () => {
     };
     fetchReservation();
   }, [reservationId]);
+
+  const handlePayment = async (paymentMethod) => {
+    if (!reservation?._id) {
+      alert('Erreur: ID de réservation manquant.');
+      navigate('/');
+      return;
+    }
+    setPaymentLoading(true);
+    setSelectedPaymentMethod(paymentMethod);
+    try {
+      if (paymentMethod === 'paypal') {
+        const paymentData = {
+          reservationId: reservation._id,
+          montant: reservation.totalAmount,
+          currency: 'MAD',
+          paymentMethod: 'paypal',
+        };
+        const response = await PaymentService.createPayment(paymentData);
+        if (response.approvalUrl) {
+          window.location.href = response.approvalUrl;
+        } else if (response.success) {
+          alert('Paiement enregistré avec succès !');
+        } else {
+          alert(response.message || 'Erreur lors du paiement.');
+        }
+      }
+    } catch (error) {
+      alert('Erreur lors du traitement du paiement. Veuillez réessayer.');
+    } finally {
+      setPaymentLoading(false);
+    }
+  };
+
+  const handleNewReservation = () => {
+    navigate('/');
+  };
 
   if (loading) {
     return (
@@ -54,49 +94,142 @@ const PaymentPage = () => {
   const customerInfo = reservation.customerInfo || {};
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background py-4 px-2">
-      <div className="w-full max-w-4xl rounded-xl shadow-xl flex flex-col md:flex-row overflow-hidden bg-card border border-border">
-        {/* Détails réservation */}
-        <div className="flex-1 p-6 flex flex-col justify-between bg-muted">
-          <div>
-            <h2 className="text-lg font-semibold text-primary mb-4">Détails de la réservation</h2>
-            <div className="flex items-center mb-4">
-              <img src={itemImage} alt={itemName} className="w-14 h-14 rounded-lg object-cover mr-4 border border-primary" />
-              <div>
-                <h3 className="text-base font-semibold text-foreground">{itemName}</h3>
-                <p className="text-muted-foreground flex items-center mt-1 text-sm"><MapPin className="w-4 h-4 mr-2" />{itemAddress}</p>
+    <div className="min-h-screen bg-background py-8 px-2">
+      <div className="container mx-auto px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border border-border text-center">
+            <h1 className="text-2xl font-bold text-foreground mb-4">Paiement de la réservation</h1>
+            <p className="text-muted-foreground mb-8">
+              Veuillez procéder au paiement pour finaliser votre réservation.
+            </p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Détails de la réservation */}
+              <div className="bg-muted rounded-xl p-6 text-left">
+                <h3 className="text-lg font-bold text-foreground mb-4">Détails de votre réservation</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden">
+                      <img
+                        src={itemImage}
+                        alt={itemName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-foreground">{itemName}</h4>
+                      <div className="flex items-center text-muted-foreground text-sm">
+                        <MapPin className="w-4 h-4 mr-1" />
+                        {itemAddress}
+                      </div>
+                    </div>
+                  </div>
+                  {reservation.date && (
+                    <div className="flex items-center text-muted-foreground">
+                      <Calendar className="w-5 h-5 mr-3" />
+                      <span>Date: {new Date(reservation.date).toLocaleDateString('fr-FR')}</span>
+                    </div>
+                  )}
+                  {reservation.participants && (
+                    <div className="flex items-center text-muted-foreground">
+                      <Users className="w-5 h-5 mr-3" />
+                      <span>Nombre de personnes: {reservation.participants}</span>
+                    </div>
+                  )}
+                  {reservation.time && (
+                    <div className="flex items-center text-muted-foreground">
+                      <Clock className="w-5 h-5 mr-3" />
+                      <span>Heure: {reservation.time}</span>
+                    </div>
+                  )}
+                  {customerInfo && (
+                    <div className="border-t border-border pt-4">
+                      <h5 className="text-foreground font-medium mb-2">Informations de contact:</h5>
+                      <div className="text-muted-foreground text-sm space-y-1">
+                        <div>Nom: {customerInfo.fullName}</div>
+                        <div>Email: {customerInfo.email}</div>
+                        <div>Téléphone: {customerInfo.phone}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+              {/* Section de paiement */}
+              <div className="bg-muted rounded-xl p-6 text-left">
+                <h3 className="text-lg font-bold text-foreground mb-4">Paiement</h3>
+                <div className="space-y-4">
+                  {/* Résumé des coûts */}
+                  <div className="bg-card rounded-lg p-4">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-muted-foreground">Prix par personne:</span>
+                      <span className="text-foreground">{reservation.price} MAD</span>
+                    </div>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-muted-foreground">Nombre de personnes:</span>
+                      <span className="text-foreground">{reservation.participants}</span>
+                    </div>
+                    <div className="border-t border-border pt-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-foreground font-bold text-base">Total:</span>
+                        <span className="text-primary font-bold text-lg">{reservation.totalAmount} MAD</span>
+                      </div>
+                    </div>
+                  </div>
+                  {/* Méthodes de paiement */}
+                  <div>
+                    <h4 className="text-foreground font-medium mb-3">Choisissez votre méthode de paiement</h4>
+                    <div className="space-y-3">
+                      {/* PayPal */}
+                      <button
+                        onClick={() => handlePayment('paypal')}
+                        disabled={paymentLoading}
+                        className={`w-full p-4 rounded-lg border-2 transition-all duration-200 flex items-center justify-center space-x-3 ${
+                          selectedPaymentMethod === 'paypal'
+                            ? 'border-blue-500 bg-blue-500/10'
+                            : 'border-border hover:border-blue-500 bg-card'
+                        } ${paymentLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-muted'}`}
+                      >
+                        <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center">
+                          <span className="text-white font-bold text-sm">P</span>
+                        </div>
+                        <span className="text-foreground font-medium">Payer avec PayPal</span>
+                        {paymentLoading && selectedPaymentMethod === 'paypal' && (
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        )}
+                      </button>
+                      {/* Carte bancaire (désactivé pour l'instant) */}
+                      <button
+                        disabled
+                        className="w-full p-4 rounded-lg border-2 border-border bg-card opacity-50 cursor-not-allowed flex items-center justify-center space-x-3"
+                      >
+                        <CreditCard className="w-6 h-6 text-muted-foreground" />
+                        <span className="text-muted-foreground font-medium">Carte bancaire (Bientôt disponible)</span>
+                      </button>
+                    </div>
+                    {/* Informations de sécurité */}
+                    <div className="mt-4 p-3 bg-green-100/20 border border-green-500/30 rounded-lg">
+                      <div className="flex items-center space-x-2 text-green-600 dark:text-green-400 text-sm">
+                        <Shield className="w-4 h-4" />
+                        <span>Paiement sécurisé par PayPal</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center text-muted-foreground text-sm"><Calendar className="w-4 h-4 mr-2 text-primary" /> {reservation.date ? new Date(reservation.date).toLocaleDateString('fr-FR') : '-'}</div>
-              <div className="flex items-center text-muted-foreground text-sm"><Users className="w-4 h-4 mr-2 text-primary" /> {reservation.participants} personne(s)</div>
-              {reservation.time && <div className="flex items-center text-muted-foreground text-sm"><Clock className="w-4 h-4 mr-2 text-primary" /> {reservation.time}</div>}
+            <div className="mt-8 space-y-4">
+              <button
+                onClick={handleNewReservation}
+                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200"
+              >
+                Nouvelle réservation
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="w-full border border-border text-muted-foreground hover:bg-muted py-3 rounded-lg font-semibold"
+              >
+                Retour à l'accueil
+              </button>
             </div>
-            <div className="border-t border-border pt-3 mt-3">
-              <h4 className="text-base font-semibold text-foreground mb-1">Contact</h4>
-              <p className="text-muted-foreground text-sm">Nom : {customerInfo.fullName}</p>
-              <p className="text-muted-foreground text-sm">Email : {customerInfo.email}</p>
-              <p className="text-muted-foreground text-sm">Téléphone : {customerInfo.phone}</p>
-            </div>
-          </div>
-        </div>
-        {/* Paiement */}
-        <div className="flex-1 p-6 flex flex-col justify-center bg-background border-l border-border">
-          <h2 className="text-lg font-semibold text-primary mb-4">Paiement</h2>
-          <div className="bg-card rounded-lg p-4 mb-4 shadow border border-border">
-            <div className="flex justify-between text-muted-foreground text-sm mb-1"><span>Prix par personne :</span> <span>{reservation.price} MAD</span></div>
-            <div className="flex justify-between text-muted-foreground text-sm mb-1"><span>Nombre de personnes :</span> <span>{reservation.participants}</span></div>
-            <div className="border-t border-border my-2"></div>
-            <div className="flex justify-between text-base font-bold text-foreground"><span>Total :</span> <span className="text-primary">{reservation.totalAmount} MAD</span></div>
-          </div>
-          <h3 className="text-base font-semibold mb-3 text-foreground">Choisissez votre méthode de paiement</h3>
-          <div className="space-y-2">
-            <button className="w-full py-2 px-4 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition text-sm">Carte Bancaire</button>
-            <button className="w-full py-2 px-4 rounded bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition text-sm">Stripe</button>
-            <button className="w-full py-2 px-4 rounded bg-yellow-400 text-black font-semibold hover:bg-yellow-500 transition text-sm">PayPal</button>
-          </div>
-          <div className="flex items-center justify-center mt-4 text-green-600 dark:text-green-400">
-            <span className="text-xs">Paiement sécurisé</span>
           </div>
         </div>
       </div>
