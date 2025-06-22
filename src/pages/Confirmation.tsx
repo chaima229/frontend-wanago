@@ -92,7 +92,7 @@ const Confirmation = () => {
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-lg overflow-hidden">
                       <img
-                        src={reservationData.restaurant.image}
+                        src={reservationData.restaurant.photos?.[0] || '/placeholder.svg'}
                         alt={reservationData.restaurant.name}
                         className="w-full h-full object-cover"
                       />

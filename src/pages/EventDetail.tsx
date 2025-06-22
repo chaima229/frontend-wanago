@@ -88,7 +88,9 @@ const EventDetail = () => {
     );
   }
 
-  const eventImage = event.photos && event.photos.length > 0 ? event.photos[0] : '/placeholder.svg';
+  const eventImage = Array.isArray(event.photos) && event.photos.length > 0
+    ? event.photos[0]
+    : '/placeholder.svg';
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -101,7 +103,12 @@ const EventDetail = () => {
                 <div className="lg:col-span-2">
                     <Card>
                         <CardHeader className="p-0">
-                            <img src={eventImage} alt={event.title} className="w-full h-96 object-cover rounded-t-lg" />
+                            <img
+                                src={eventImage}
+                                alt={event.title}
+                                className="w-full h-96 object-cover rounded-t-lg"
+                                onError={e => { e.target.src = '/placeholder.svg'; }}
+                            />
                         </CardHeader>
                         <CardContent className="p-6">
                             <h1 className="text-4xl font-bold mb-4">{event.title}</h1>

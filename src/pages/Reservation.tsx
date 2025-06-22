@@ -171,7 +171,7 @@ const Reservation = () => {
 
             <div className="aspect-video mb-4 rounded-lg overflow-hidden">
               <img
-                src={reservationData.restaurant.image}
+                src={reservationData.restaurant.photos?.[0] || '/placeholder.svg'}
                 alt={reservationData.restaurant.name}
                 className="w-full h-full object-cover"
               />

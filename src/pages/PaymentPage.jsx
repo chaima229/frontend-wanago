@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ReservationService } from "../services/reservationService";
 import { PaymentService } from "../services/paymentService";
+import { RestaurantService } from "../services/restaurantService";
+import { EventService } from "../services/eventService";
 // Si tu as des icônes Lucide ou similaires, importe-les ici
 import { Calendar, Clock, Users, MapPin, CreditCard, Shield } from 'lucide-react';
 
@@ -12,6 +14,7 @@ const PaymentPage = () => {
   const reservationId = params.get("reservationId");
 
   const [reservation, setReservation] = useState(null);
+  const [item, setItem] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
@@ -33,6 +36,24 @@ const PaymentPage = () => {
     };
     fetchReservation();
   }, [reservationId]);
+
+  useEffect(() => {
+    const fetchItem = async () => {
+      if (!reservation) return;
+      try {
+        if (reservation.itemType === "restaurant") {
+          const restaurant = await RestaurantService.getRestaurantById(reservation.itemId);
+          setItem(restaurant);
+        } else if (reservation.itemType === "event") {
+          const event = await EventService.getEventById(reservation.itemId);
+          setItem(event);
+        }
+      } catch (e) {
+        setItem(null);
+      }
+    };
+    fetchItem();
+  }, [reservation]);
 
   const handlePayment = async (paymentMethod) => {
     if (!reservation?._id) {
@@ -86,11 +107,9 @@ const PaymentPage = () => {
     );
   }
 
-  // Simuler un objet item pour l'affichage (à adapter selon ta structure réelle)
-  const item = reservation.item || {};
-  const itemName = item.name || item.title || 'Réservation';
-  const itemImage = item.photos?.[0] || '/placeholder.svg';
-  const itemAddress = item.address || '-';
+  const itemImage = item?.photos?.[0] || item?.image || '/placeholder.svg';
+  const itemName = item?.name || item?.title || 'Réservation';
+  const itemAddress = item?.address || '-';
   const customerInfo = reservation.customerInfo || {};
 
   return (
@@ -108,11 +127,12 @@ const PaymentPage = () => {
                 <h3 className="text-lg font-bold text-foreground mb-4">Détails de votre réservation</h3>
                 <div className="space-y-4">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 rounded-lg overflow-hidden">
+                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                       <img
                         src={itemImage}
                         alt={itemName}
                         className="w-full h-full object-cover"
+                        onError={e => e.target.src = '/placeholder.svg'}
                       />
                     </div>
                     <div>

@@ -1,6 +1,8 @@
 import { ApiService } from './api';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { RestaurantService } from "../services/restaurantService";
+import { EventService } from "../services/eventService";
 
 export interface Reservation {
   _id: string;
