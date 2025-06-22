@@ -32,6 +32,7 @@ import ReservationDetail from "./pages/admin/ReservationDetail";
 import AdminRestaurants from "./pages/admin/Restaurants";
 import AdminEvents from "./pages/admin/Events";
 import RestaurantForm from './pages/admin/RestaurantForm';
+import EventForm from './pages/admin/EventForm';
 import PaymentPage from "./pages/PaymentPage";
 import RedirectAuthenticatedRoute from "./components/RedirectAuthenticatedRoute";
 
@@ -128,6 +129,8 @@ const App = () => (
                     <Route path="restaurants/new" element={<RestaurantForm />} />
                     <Route path="restaurants/edit/:id" element={<RestaurantForm />} />
                     <Route path="events" element={<AdminEvents />} />
+                    <Route path="events/new" element={<EventForm />} />
+                    <Route path="events/edit/:id" element={<EventForm />} />
                   </Route>
                   <Route
                     path="/payment"

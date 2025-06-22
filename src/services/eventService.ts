@@ -77,4 +77,14 @@ export class EventService {
       throw new Error("Erreur lors de la suppression de l'événement.");
     }
   }
+
+  static async createEvent(eventData: Partial<Event>): Promise<Event> {
+    try {
+      const response = await ApiService.post<{ event: Event }>('/events', eventData);
+      return response.event;
+    } catch (error) {
+      console.error('Create event error:', error);
+      throw new Error("Erreur lors de la création de l'événement.");
+    }
+  }
 } 
