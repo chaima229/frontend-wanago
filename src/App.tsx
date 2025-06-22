@@ -32,6 +32,7 @@ import ReservationDetail from "./pages/admin/ReservationDetail";
 import AdminRestaurants from "./pages/admin/Restaurants";
 import AdminEvents from "./pages/admin/Events";
 import RestaurantForm from './pages/admin/RestaurantForm';
+import PaymentPage from "./pages/PaymentPage";
 
 const queryClient = new QueryClient();
 
@@ -113,6 +114,14 @@ const App = () => (
                     <Route path="restaurants/edit/:id" element={<RestaurantForm />} />
                     <Route path="events" element={<AdminEvents />} />
                   </Route>
+                  <Route
+                    path="/payment"
+                    element={
+                      <ProtectedRoute>
+                        <PaymentPage />
+                      </ProtectedRoute>
+                    }
+                  />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </div>
