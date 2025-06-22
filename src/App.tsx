@@ -33,6 +33,7 @@ import AdminRestaurants from "./pages/admin/Restaurants";
 import AdminEvents from "./pages/admin/Events";
 import RestaurantForm from './pages/admin/RestaurantForm';
 import PaymentPage from "./pages/PaymentPage";
+import RedirectAuthenticatedRoute from "./components/RedirectAuthenticatedRoute";
 
 const queryClient = new QueryClient();
 
@@ -49,8 +50,22 @@ const App = () => (
                 <Navbar />
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/login" element={<Login />} />
+                  <Route
+                    path="/auth"
+                    element={
+                      <RedirectAuthenticatedRoute>
+                        <Auth />
+                      </RedirectAuthenticatedRoute>
+                    }
+                  />
+                  <Route
+                    path="/login"
+                    element={
+                      <RedirectAuthenticatedRoute>
+                        <Login />
+                      </RedirectAuthenticatedRoute>
+                    }
+                  />
                   <Route path="/events" element={<Events />} />
                   <Route path="/events/:id" element={<EventDetail />} />
                   <Route path="/about" element={<About />} />
