@@ -43,7 +43,7 @@ const Contact = () => {
     {
       icon: Mail,
       title: 'Email',
-      info: 'contact@restaurantgo.ma',
+      info: 'wanago241@gmail.com',
       description: 'Envoyez-nous un email'
     },
     {

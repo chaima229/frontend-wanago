@@ -34,6 +34,8 @@ import AdminEvents from "./pages/admin/Events";
 import RestaurantForm from './pages/admin/RestaurantForm';
 import EventForm from './pages/admin/EventForm';
 import PaymentPage from "./pages/PaymentPage";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentFailed from "./pages/PaymentFailed";
 import RedirectAuthenticatedRoute from "./components/RedirectAuthenticatedRoute";
 import LeaveReviewPage from './pages/LeaveReviewPage';
 import Reservations from './pages/admin/Reservations';
@@ -149,6 +151,22 @@ const App = () => (
                     element={
                       <ProtectedRoute>
                         <PaymentPage />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/payment/success"
+                    element={
+                      <ProtectedRoute>
+                        <PaymentSuccess />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/payment/failed"
+                    element={
+                      <ProtectedRoute>
+                        <PaymentFailed />
                       </ProtectedRoute>
                     }
                   />
