@@ -71,6 +71,10 @@ class ReservationServiceImpl {
     const response = await ApiService.put(`/reservations/${reservationId}/cancel`, {});
     return response;
   }
+
+  async deleteReservation(id: string): Promise<void> {
+    await ApiService.delete(`/reservations/${id}`);
+  }
 }
 
 export const ReservationService = new ReservationServiceImpl();

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ReservationService, Reservation } from '@/services/reservationService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Loader2, Eye } from 'lucide-react';
+import { Loader2, Eye, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { 
   Pagination, 
@@ -16,15 +16,39 @@ import {
 } from '@/components/ui/pagination';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 const ITEMS_PER_PAGE = 5;
 
 const AdminReservations = () => {
+  const queryClient = useQueryClient();
   const { data: reservations = [], isLoading, error } = useQuery<Reservation[]>({
     queryKey: ['adminReservations'],
     queryFn: ReservationService.getAllReservations,
   });
   const [currentPage, setCurrentPage] = useState(1);
+  const [reservationToDelete, setReservationToDelete] = useState<string | null>(null);
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => ReservationService.deleteReservation(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminReservations'] });
+    },
+  });
+
+  const handleDelete = (id: string) => {
+    deleteMutation.mutate(id);
+  };
 
   const totalPages = reservations ? Math.ceil(reservations.length / ITEMS_PER_PAGE) : 0;
   const paginatedReservations = reservations?.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -100,6 +124,38 @@ const AdminReservations = () => {
                                 <p>Voir les détails</p>
                               </TooltipContent>
                             </Tooltip>
+                            <AlertDialog>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                      <Trash2 className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Supprimer la réservation</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Êtes-vous absolument sûr?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Cette action ne peut pas être annulée. Cela supprimera définitivement la réservation.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Annuler</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDelete(reservation._id)}
+                                    disabled={deleteMutation.isPending}
+                                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                  >
+                                    {deleteMutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : 'Supprimer'}
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
                           </TooltipProvider>
                         </TableCell>
                       </TableRow>
@@ -109,7 +165,10 @@ const AdminReservations = () => {
                 <Pagination className="mt-6">
                   <PaginationContent>
                     <PaginationItem>
-                      <PaginationPrevious onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} />
+                      <PaginationPrevious 
+                        onClick={() => handlePageChange(currentPage - 1)} 
+                        className={currentPage === 1 ? "pointer-events-none opacity-50" : undefined}
+                      />
                     </PaginationItem>
                     {[...Array(totalPages)].map((_, i) => (
                       <PaginationItem key={i}>
@@ -122,7 +181,10 @@ const AdminReservations = () => {
                       </PaginationItem>
                     ))}
                     <PaginationItem>
-                      <PaginationNext onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} />
+                      <PaginationNext 
+                        onClick={() => handlePageChange(currentPage + 1)} 
+                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : undefined}
+                      />
                     </PaginationItem>
                   </PaginationContent>
                 </Pagination>
