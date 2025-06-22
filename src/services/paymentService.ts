@@ -19,6 +19,11 @@ class PaymentServiceImpl {
     const response = await ApiService.get<Payment[]>('/payments');
     return response;
   }
+
+  async createPayment(paymentData: any): Promise<any> {
+    const response = await ApiService.post('/payments', paymentData);
+    return response;
+  }
 }
 
 export const PaymentService = new PaymentServiceImpl(); 
