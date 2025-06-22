@@ -100,7 +100,7 @@ const Login = () => {
       <div 
         className="hidden lg:flex lg:w-1/2 bg-cover bg-center relative"
         style={{
-          backgroundImage: `url('/wanaGOO.jpg')`
+          backgroundImage: `url('/public/wanaGOO.jpg')`
         }}
       >
         <div className="absolute inset-0 bg-black bg-opacity-40"></div>

@@ -38,7 +38,12 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center space-x-8">
             <Link to="/" className="text-foreground font-bold text-xl">
-              RestaurantGo
+            <img
+              src="/WanaGo.png"         // ✅ Pas besoin de /public dans le src
+              alt="WanaGO"
+              className="w-32 h-10"     // ✅ Remplace par la taille que tu veux
+            />
+
             </Link>
             <div className="hidden md:flex space-x-6">
               {navItems.map((item) => (
