@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { LayoutGrid, UsersRound, CalendarCheck2, Wallet, UtensilsCrossed, Calendar } from 'lucide-react';
+import { LayoutGrid, UsersRound, CalendarCheck2, Wallet, UtensilsCrossed, Calendar, Star } from 'lucide-react';
 
 const baseLinkClasses = "flex h-9 w-9 items-center justify-center rounded-lg transition-colors md:h-8 md:w-8";
 const activeLinkClasses = "text-primary";
@@ -66,6 +66,15 @@ const AdminLayout = () => {
                   </NavLink>
                 </TooltipTrigger>
                 <TooltipContent side="right">Événements</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <NavLink to="/admin/reviews" end className={({ isActive }) => `${baseLinkClasses} ${isActive ? activeLinkClasses : inactiveLinkClasses}`}>
+                    <Star className="h-5 w-5" />
+                    <span className="sr-only">Avis</span>
+                  </NavLink>
+                </TooltipTrigger>
+                <TooltipContent side="right">Avis</TooltipContent>
               </Tooltip>
             </TooltipProvider>
         </nav>

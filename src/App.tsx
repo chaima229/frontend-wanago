@@ -36,6 +36,8 @@ import EventForm from './pages/admin/EventForm';
 import PaymentPage from "./pages/PaymentPage";
 import RedirectAuthenticatedRoute from "./components/RedirectAuthenticatedRoute";
 import LeaveReviewPage from './pages/LeaveReviewPage';
+import Reservations from './pages/admin/Reservations';
+import ManageReviews from './pages/admin/ManageReviews';
 
 const queryClient = new QueryClient();
 
@@ -140,6 +142,7 @@ const App = () => (
                     <Route path="events" element={<AdminEvents />} />
                     <Route path="events/new" element={<EventForm />} />
                     <Route path="events/edit/:id" element={<EventForm />} />
+                    <Route path="reviews" element={<ManageReviews />} />
                   </Route>
                   <Route
                     path="/payment"

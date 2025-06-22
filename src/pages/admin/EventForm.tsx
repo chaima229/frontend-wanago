@@ -18,8 +18,8 @@ import { uploadImage } from '@/services/storageService';
 import { Label } from "@/components/ui/label"
 
 const MOROCCAN_LOCATIONS = [
-    // Casablanca
-    { name: "Casablanca - Centre-ville", lat: 33.5731, lon: -7.5898 },
+  // Casablanca
+  { name: "Casablanca - Centre-ville", lat: 33.5731, lon: -7.5898 },
     { name: "Casablanca - Ain Diab", lat: 33.5952, lon: -7.6324 },
     { name: "Casablanca - Corniche", lat: 33.6089, lon: -7.6328 },
     { name: "Casablanca - Derb Sultan", lat: 33.5589, lon: -7.6324 },
@@ -29,9 +29,9 @@ const MOROCCAN_LOCATIONS = [
     { name: "Casablanca - Roches Noires", lat: 33.5952, lon: -7.6324 },
     { name: "Casablanca - Ain Sebaa", lat: 33.6089, lon: -7.6328 },
     { name: "Casablanca - Sidi Moumen", lat: 33.5589, lon: -7.6324 },
-    
-    // Rabat
-    { name: "Rabat - Agdal", lat: 34.0209, lon: -6.8416 },
+  
+  // Rabat
+  { name: "Rabat - Agdal", lat: 34.0209, lon: -6.8416 },
     { name: "Rabat - Hassan", lat: 34.0224, lon: -6.8341 },
     { name: "Rabat - Souissi", lat: 34.0089, lon: -6.8516 },
     { name: "Rabat - Hay Riad", lat: 34.0089, lon: -6.8516 },
@@ -39,16 +39,16 @@ const MOROCCAN_LOCATIONS = [
     { name: "Rabat - Salé", lat: 34.0333, lon: -6.8167 },
     { name: "Rabat - Temara", lat: 33.9167, lon: -6.9167 },
     { name: "Rabat - Skhirat", lat: 33.8500, lon: -7.0333 },
-    
-    // Salé
+  
+  // Salé
     { name: "Salé - Médina", lat: 34.0333, lon: -6.8167 },
-    { name: "Salé - Bettana", lat: 34.0333, lon: -6.8167 },
-    { name: "Salé - Tabriquet", lat: 34.0333, lon: -6.8167 },
+  { name: "Salé - Bettana", lat: 34.0333, lon: -6.8167 },
+  { name: "Salé - Tabriquet", lat: 34.0333, lon: -6.8167 },
     { name: "Salé - Hay Salam", lat: 34.0333, lon: -6.8167 },
-    { name: "Salé - Sidi Moussa", lat: 34.0333, lon: -6.8167 },
-    
-    // Marrakech
-    { name: "Marrakech - Médina", lat: 31.6295, lon: -7.9811 },
+  { name: "Salé - Sidi Moussa", lat: 34.0333, lon: -6.8167 },
+  
+  // Marrakech
+  { name: "Marrakech - Médina", lat: 31.6295, lon: -7.9811 },
     { name: "Marrakech - Gueliz", lat: 31.6343, lon: -8.0084 },
     { name: "Marrakech - Palmeraie", lat: 31.6531, lon: -8.0122 },
     { name: "Marrakech - Hivernage", lat: 31.6405, lon: -7.9996 },
@@ -58,69 +58,69 @@ const MOROCCAN_LOCATIONS = [
     { name: "Marrakech - Mellah", lat: 31.6319, lon: -7.9776 },
     { name: "Marrakech - Riad Zitoun", lat: 31.6292, lon: -7.9823 },
     { name: "Marrakech - Targa", lat: 31.6410, lon: -8.0200 },
-    
-    // Agadir
-    { name: "Agadir - Centre-ville", lat: 30.4278, lon: -9.5981 },
-    { name: "Agadir - Talborjt", lat: 30.4278, lon: -9.5981 },
-    { name: "Agadir - Founty", lat: 30.4278, lon: -9.5981 },
-    { name: "Agadir - Hay Hassani", lat: 30.4278, lon: -9.5981 },
+  
+  // Agadir
+  { name: "Agadir - Centre-ville", lat: 30.4278, lon: -9.5981 },
+  { name: "Agadir - Talborjt", lat: 30.4278, lon: -9.5981 },
+  { name: "Agadir - Founty", lat: 30.4278, lon: -9.5981 },
+  { name: "Agadir - Hay Hassani", lat: 30.4278, lon: -9.5981 },
     { name: "Agadir - Anza", lat: 30.4278, lon: -9.5981 },
-    { name: "Agadir - Tikiouine", lat: 30.4278, lon: -9.5981 },
+  { name: "Agadir - Tikiouine", lat: 30.4278, lon: -9.5981 },
     { name: "Agadir - Al Houda", lat: 30.4278, lon: -9.5981 },
     { name: "Agadir - Dakhla", lat: 30.4278, lon: -9.5981 },
     { name: "Agadir - Cité Dakhla", lat: 30.4278, lon: -9.5981 },
-    
-    // Fès
-    { name: "Fès - Médina", lat: 34.0181, lon: -5.0078 },
+  
+  // Fès
+  { name: "Fès - Médina", lat: 34.0181, lon: -5.0078 },
     { name: "Fès - Jdid", lat: 34.0181, lon: -5.0078 },
-    { name: "Fès - Ville Nouvelle", lat: 34.0181, lon: -5.0078 },
+  { name: "Fès - Ville Nouvelle", lat: 34.0181, lon: -5.0078 },
     { name: "Fès - Agdal", lat: 34.0181, lon: -5.0078 },
-    { name: "Fès - Saiss", lat: 34.0181, lon: -5.0078 },
-    { name: "Fès - Ain Chkef", lat: 34.0181, lon: -5.0078 },
-    
-    // Tanger
-    { name: "Tanger - Médina", lat: 35.7595, lon: -5.8340 },
-    { name: "Tanger - Ville Nouvelle", lat: 35.7595, lon: -5.8340 },
-    { name: "Tanger - Malabata", lat: 35.7595, lon: -5.8340 },
-    { name: "Tanger - Marshan", lat: 35.7595, lon: -5.8340 },
-    { name: "Tanger - Charf", lat: 35.7595, lon: -5.8340 },
-    { name: "Tanger - Beni Makada", lat: 35.7595, lon: -5.8340 },
-    
-    // Meknès
-    { name: "Meknès - Médina", lat: 33.8935, lon: -5.5473 },
-    { name: "Meknès - Ville Nouvelle", lat: 33.8935, lon: -5.5473 },
-    { name: "Meknès - Agdal", lat: 33.8935, lon: -5.5473 },
+  { name: "Fès - Saiss", lat: 34.0181, lon: -5.0078 },
+  { name: "Fès - Ain Chkef", lat: 34.0181, lon: -5.0078 },
+  
+  // Tanger
+  { name: "Tanger - Médina", lat: 35.7595, lon: -5.8340 },
+  { name: "Tanger - Ville Nouvelle", lat: 35.7595, lon: -5.8340 },
+  { name: "Tanger - Malabata", lat: 35.7595, lon: -5.8340 },
+  { name: "Tanger - Marshan", lat: 35.7595, lon: -5.8340 },
+  { name: "Tanger - Charf", lat: 35.7595, lon: -5.8340 },
+  { name: "Tanger - Beni Makada", lat: 35.7595, lon: -5.8340 },
+  
+  // Meknès
+  { name: "Meknès - Médina", lat: 33.8935, lon: -5.5473 },
+  { name: "Meknès - Ville Nouvelle", lat: 33.8935, lon: -5.5473 },
+  { name: "Meknès - Agdal", lat: 33.8935, lon: -5.5473 },
     { name: "Meknès - Hay Salam", lat: 33.8935, lon: -5.5473 },
-    { name: "Meknès - Al Bassatine", lat: 33.8935, lon: -5.5473 },
-    
-    // Oujda
-    { name: "Oujda - Centre-ville", lat: 34.6814, lon: -1.9086 },
+  { name: "Meknès - Al Bassatine", lat: 33.8935, lon: -5.5473 },
+  
+  // Oujda
+  { name: "Oujda - Centre-ville", lat: 34.6814, lon: -1.9086 },
     { name: "Oujda - Médina", lat: 34.6814, lon: -1.9086 },
     { name: "Oujda - Ville Nouvelle", lat: 34.6814, lon: -1.9086 },
-    { name: "Oujda - Al Qods", lat: 34.6814, lon: -1.9086 },
-    
-    // Tétouan
-    { name: "Tétouan - Médina", lat: 35.5711, lon: -5.3724 },
-    { name: "Tétouan - Ville Nouvelle", lat: 35.5711, lon: -5.3724 },
-    { name: "Tétouan - Malaliyine", lat: 35.5711, lon: -5.3724 },
+  { name: "Oujda - Al Qods", lat: 34.6814, lon: -1.9086 },
+  
+  // Tétouan
+  { name: "Tétouan - Médina", lat: 35.5711, lon: -5.3724 },
+  { name: "Tétouan - Ville Nouvelle", lat: 35.5711, lon: -5.3724 },
+  { name: "Tétouan - Malaliyine", lat: 35.5711, lon: -5.3724 },
     { name: "Tétouan - M'diq", lat: 35.5711, lon: -5.3724 },
-    
-    // Safi
+  
+  // Safi
     { name: "Safi - Médina", lat: 32.2833, lon: -9.2333 },
     { name: "Safi - Ville Nouvelle", lat: 32.2833, lon: -9.2333 },
     { name: "Safi - Jorf Lasfar", lat: 32.2833, lon: -9.2333 },
-    
-    // El Jadida
+  
+  // El Jadida
     { name: "El Jadida - Médina", lat: 33.2333, lon: -8.5000 },
     { name: "El Jadida - Ville Nouvelle", lat: 33.2333, lon: -8.5000 },
     { name: "El Jadida - Haouzia", lat: 33.2333, lon: -8.5000 },
-    
-    // Essaouira
-    { name: "Essaouira - Médina", lat: 31.5085, lon: -9.7595 },
-    { name: "Essaouira - Ville Nouvelle", lat: 31.5085, lon: -9.7595 },
+  
+  // Essaouira
+  { name: "Essaouira - Médina", lat: 31.5085, lon: -9.7595 },
+  { name: "Essaouira - Ville Nouvelle", lat: 31.5085, lon: -9.7595 },
     { name: "Essaouira - Diabat", lat: 31.5085, lon: -9.7595 },
-    
-    // Chefchaouen
+  
+  // Chefchaouen
     { name: "Chefchaouen - Médina", lat: 35.1714, lon: -5.2697 },
     { name: "Chefchaouen - Ville Nouvelle", lat: 35.1714, lon: -5.2697 },
     { name: "Chefchaouen - Ras El Maa", lat: 35.1714, lon: -5.2697 },
@@ -176,12 +176,12 @@ const EventForm = () => {
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: {
-      title: '',
-      description: '',
-      dateStart: '',
-      dateEnd: '',
-      price: 0,
-      capacity: 0,
+    title: '',
+    description: '',
+    dateStart: '',
+    dateEnd: '',
+    price: 0,
+    capacity: 0,
       category: '',
       location: { type: 'Point', coordinates: [0, 0] },
       photos: [],
@@ -252,7 +252,7 @@ const EventForm = () => {
       navigate('/admin/events');
     },
     onError: (error) => {
-       toast({
+      toast({
         title: 'Erreur',
         description: error.message || `Une erreur est survenue.`,
         variant: 'destructive',
@@ -290,7 +290,7 @@ const EventForm = () => {
               {form.formState.errors && Object.keys(form.formState.errors).length > 0 && (
                 <div className="p-4 mb-4 text-sm text-destructive-foreground bg-destructive rounded-lg" role="alert">
                   <span className="font-bold">Erreur de validation.</span> Veuillez corriger les champs en surbrillance.
-                </div>
+      </div>
               )}
 
                <FormField
@@ -329,7 +329,7 @@ const EventForm = () => {
                 )}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
                   name="dateStart"
@@ -354,7 +354,7 @@ const EventForm = () => {
                     <FormItem>
                       <FormLabel>Date de fin (optionnel)</FormLabel>
                       <FormControl>
-                        <Input
+                <Input
                           type="datetime-local"
                           {...field}
                           value={field.value ?? ""}
@@ -405,7 +405,7 @@ const EventForm = () => {
                     )}
                 />
               </div>
-              
+
               <FormField
                 control={form.control}
                 name="category"
@@ -417,18 +417,18 @@ const EventForm = () => {
                       value={field.value ?? ""}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                  <SelectTrigger>
                           <SelectValue placeholder="Sélectionnez une catégorie" />
-                        </SelectTrigger>
+                  </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                  <SelectContent>
                         <SelectItem value="Concert">Concert</SelectItem>
                         <SelectItem value="Festival">Festival</SelectItem>
                         <SelectItem value="Sport">Sport</SelectItem>
                         <SelectItem value="Art">Art</SelectItem>
                         <SelectItem value="Conférence">Conférence</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  </SelectContent>
+                </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -478,7 +478,7 @@ const EventForm = () => {
                     <FormItem>
                       <FormLabel>URL de l'image</FormLabel>
                       <FormControl>
-                        <Input
+                <Input
                           placeholder="https://example.com/image.jpg"
                           {...field}
                           value={field.value ?? ""}
@@ -501,9 +501,9 @@ const EventForm = () => {
                   }}
                 >
                   <FormControl>
-                    <SelectTrigger>
+                  <SelectTrigger>
                       <SelectValue placeholder="Sélectionnez un emplacement" />
-                    </SelectTrigger>
+                  </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {MOROCCAN_LOCATIONS.map((loc) => (
@@ -520,11 +520,11 @@ const EventForm = () => {
             <CardFooter>
               <Button type="submit" disabled={mutation.isPending}>
                 {mutation.isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (isEditMode ? 'Mettre à jour' : 'Créer')}
-              </Button>
+                </Button>
             </CardFooter>
           </form>
         </Form>
-      </Card>
+        </Card>
     </div>
   );
 };
