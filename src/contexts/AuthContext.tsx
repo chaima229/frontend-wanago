@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     let warningTimer: NodeJS.Timeout;
     let countdownInterval: NodeJS.Timer;
 
-    const LOGOUT_TIME = 10 * 60 * 1000; // 10 minutes
+    const LOGOUT_TIME = 10 * 60 * 3000; // 10 minutes
     const WARNING_TIME = LOGOUT_TIME - (1 * 60 * 1000); // 1 minute before logout
 
     const startTimers = () => {
