@@ -12,10 +12,12 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Restaurant } from '../services/restaurantService';
+import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { 
     data: reservations = [], 
@@ -45,49 +47,11 @@ const Dashboard = () => {
     }
   };
 
-  const handlePayReservation = async (reservation) => {
-    try {
-      console.log('=== PAYMENT REQUEST DEBUG ===');
-      console.log('Reservation object:', reservation);
-      console.log('Reservation ID:', reservation._id);
-      console.log('Reservation totalAmount:', reservation.totalAmount);
-      console.log('Reservation price:', reservation.price);
-      console.log('Reservation itemType:', reservation.itemType);
-      
-      if (!reservation._id) {
-        throw new Error('ID de réservation manquant');
-      }
-      
-      // Calculer le montant en fonction du type de réservation
-      let montant = reservation.totalAmount;
-      if (!montant || montant === 0) {
-        if (reservation.itemType === 'event' || reservation.event) {
-          montant = reservation.event?.price || reservation.price || 0;
-        } else if (reservation.itemType === 'restaurant' || reservation.restaurant) {
-          montant = (reservation.price || 0) * (reservation.guests || 1);
-        }
-      }
-      
-      console.log('Calculated montant:', montant);
-      
-      if (!montant || montant === 0) {
-        throw new Error('Montant de paiement invalide');
-      }
-      
-      await PaymentService.createPayment({
-        reservationId: reservation._id,
-        montant: montant,
-        currency: 'MAD',
-        paymentMethod: 'paypal'
-      });
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast({
-        title: 'Erreur',
-        description: error.message || 'Erreur lors de la création du paiement.',
-        variant: 'destructive',
-      });
+  const handlePayReservation = (reservation) => {
+    if (!reservation._id) {
+      return;
     }
+    navigate(`/payment?reservationId=${reservation._id}`);
   };
 
   const getStatusBadge = (status: string) => {
@@ -228,11 +192,11 @@ const Dashboard = () => {
                     <div className="flex justify-between items-start">
                       <div>
                         <CardTitle className="text-xl text-foreground mb-2">
-                          {reservation.restaurant?.name || reservation.event?.title || 'Réservation'}
+                          {reservation.itemName || 'Réservation'}
                         </CardTitle>
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <MapPin className="w-4 h-4" />
-                          <span>{formatLocation(reservation.restaurant?.location || reservation.event?.location)}</span>
+                          <span>{formatLocation(reservation.location)}</span>
                         </div>
                       </div>
                       <div className="text-right">
@@ -259,13 +223,6 @@ const Dashboard = () => {
                           <div className="flex items-center gap-2 text-muted-foreground">
                             <Clock className="w-4 h-4 text-purple-400" />
                             <span>{reservation.time}</span>
-                          </div>
-                        )}
-                        
-                        {reservation.guests && (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Users className="w-4 h-4 text-purple-400" />
-                            <span>{reservation.guests} {reservation.guests > 1 ? 'personnes' : 'personne'}</span>
                           </div>
                         )}
                         
@@ -309,37 +266,13 @@ const Dashboard = () => {
                         >
                           Annuler la réservation
                         </Button>
-                        {/* Only show pay button for restaurant reservations with valid amount */}
-                        {reservation.restaurant && (reservation.totalAmount > 0 || (reservation.price > 0 && reservation.guests > 0)) && (
-                          <Button
-                            onClick={() => handlePayReservation(reservation)}
-                            variant="default"
-                            size="sm"
-                          >
-                            Payer
-                          </Button>
-                        )}
-                        {/* Show pay button for event reservations with valid price */}
-                        {reservation.event && (reservation.event as any).price > 0 && (
-                          <Button
-                            onClick={() => handlePayReservation(reservation)}
-                            variant="default"
-                            size="sm"
-                          >
-                            Payer
-                          </Button>
-                        )}
-                        {/* Debug info */}
-                        {reservation.status === 'pending' && (
-                          <div className="text-xs text-muted-foreground mt-2">
-                            Debug: Restaurant: {reservation.restaurant ? 'Yes' : 'No'}, 
-                            Event: {reservation.event ? 'Yes' : 'No'}, 
-                            TotalAmount: {reservation.totalAmount}, 
-                            Price: {reservation.price}, 
-                            Event Price: {(reservation.event as any)?.price || 'N/A'}, 
-                            Guests: {reservation.guests}
-                          </div>
-                        )}
+                        <Button
+                          onClick={() => handlePayReservation(reservation)}
+                          variant="default"
+                          size="sm"
+                        >
+                          Payer
+                        </Button>
                       </div>
                     )}
                     {reservation.status === 'confirmed' && (

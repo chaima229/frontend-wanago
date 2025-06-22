@@ -1,4 +1,6 @@
 import { ApiService } from './api';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 export interface Reservation {
   _id: string;
@@ -65,3 +67,8 @@ class ReservationServiceImpl {
 }
 
 export const ReservationService = new ReservationServiceImpl();
+
+const handlePayReservation = (reservation) => {
+  const navigate = useNavigate();
+  navigate(`/payment?reservationId=${reservation._id}`);
+};
