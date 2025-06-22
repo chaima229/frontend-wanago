@@ -1,8 +1,22 @@
-
+"use client"
 import React from 'react';
 import { Star, Users, Award, Clock } from 'lucide-react';
+import { Link, useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const About = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  const handleGetStartedClick = () => {
+    if (isAuthenticated) {
+      navigate('/leave-review');
+    } else {
+      navigate('/login');
+    }
+  };
+
   const stats = [
     { icon: Users, label: 'Restaurants partenaires', value: '500+' },
     { icon: Star, label: 'Avis clients', value: '4.8/5' },
@@ -58,11 +72,13 @@ const About = () => {
         <div className="text-center">
           <h2 className="text-3xl font-bold text-foreground mb-6">Rejoignez-nous</h2>
           <p className="text-xl text-muted-foreground mb-8">
-            Découvrez pourquoi des milliers de personnes nous font confiance pour leurs réservations.
+            {isAuthenticated ? "Partagez votre expérience avec nous." : "Découvrez pourquoi des milliers de personnes nous font confiance pour leurs réservations."}
           </p>
           <div className="flex justify-center space-x-4">
             <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-lg font-semibold">
-              Commencer maintenant
+              <Button onClick={handleGetStartedClick}>
+                {isAuthenticated ? "Donner mon avis" : "Commencer maintenant"}
+              </Button>
             </div>
           </div>
         </div>

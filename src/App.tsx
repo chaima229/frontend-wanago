@@ -35,6 +35,7 @@ import RestaurantForm from './pages/admin/RestaurantForm';
 import EventForm from './pages/admin/EventForm';
 import PaymentPage from "./pages/PaymentPage";
 import RedirectAuthenticatedRoute from "./components/RedirectAuthenticatedRoute";
+import LeaveReviewPage from './pages/LeaveReviewPage';
 
 const queryClient = new QueryClient();
 
@@ -109,6 +110,14 @@ const App = () => (
                     element={
                       <ProtectedRoute>
                         <Profile />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/leave-review"
+                    element={
+                      <ProtectedRoute>
+                        <LeaveReviewPage />
                       </ProtectedRoute>
                     }
                   />

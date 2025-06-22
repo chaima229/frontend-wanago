@@ -5,6 +5,7 @@ import { FirebaseAuthService, User } from '../services/firebaseAuthService';
 import { UserService } from '../services/userService';
 import { useToast } from '@/hooks/use-toast';
 import { ApiService } from '@/services/api';
+import SessionTimeoutModal from '@/components/SessionTimeoutModal';
 
 interface AuthContextType {
   user: User | null;
@@ -31,6 +32,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [countdown, setCountdown] = useState(60);
   const { toast } = useToast();
 
   const isAuthenticated = !!user;
@@ -96,23 +99,63 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    let inactivityTimer: NodeJS.Timeout;
+    let sessionTimer: NodeJS.Timeout;
+    let warningTimer: NodeJS.Timeout;
+    let countdownInterval: NodeJS.Timer;
 
-    const resetTimer = () => {
-      clearTimeout(inactivityTimer);
-      inactivityTimer = setTimeout(() => {
-        logout(true);
-      }, 3600000); // 1 hour
+    const LOGOUT_TIME = 10 * 60 * 1000; // 10 minutes
+    const WARNING_TIME = LOGOUT_TIME - (1 * 60 * 1000); // 1 minute before logout
+
+    const startTimers = () => {
+      warningTimer = setTimeout(() => {
+        setIsModalOpen(true);
+        setCountdown(60); 
+        countdownInterval = setInterval(() => {
+          setCountdown(prev => {
+            if (prev <= 1) {
+              clearInterval(countdownInterval);
+              handleLogout(true);
+              return 0;
+            }
+            return prev - 1;
+          });
+        }, 1000);
+      }, WARNING_TIME);
+
+      sessionTimer = setTimeout(() => {
+        handleLogout(true);
+      }, LOGOUT_TIME);
+    };
+
+    const clearTimers = () => {
+      clearTimeout(sessionTimer);
+      clearTimeout(warningTimer);
+      clearInterval(countdownInterval);
+    };
+
+    const resetTimers = () => {
+      clearTimers();
+      startTimers();
+    };
+
+    const handleContinue = () => {
+      setIsModalOpen(false);
+      resetTimers();
+    };
+    
+    const handleLogout = async (isInactive = false) => {
+        setIsModalOpen(false);
+        await logout(isInactive);
     };
 
     const events = ['mousemove', 'keydown', 'click', 'scroll'];
-    events.forEach(event => window.addEventListener(event, resetTimer));
+    events.forEach(event => window.addEventListener(event, resetTimers));
 
-    resetTimer(); // Start the timer initially
+    startTimers();
 
     return () => {
-      clearTimeout(inactivityTimer);
-      events.forEach(event => window.removeEventListener(event, resetTimer));
+      clearTimers();
+      events.forEach(event => window.removeEventListener(event, resetTimers));
     };
   }, [isAuthenticated, logout]);
 
@@ -167,5 +210,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      <SessionTimeoutModal
+        isOpen={isModalOpen}
+        onContinue={() => {
+          setIsModalOpen(false);
+          // The reset timers logic will be handled by the main event listeners
+        }}
+        onLogout={() => logout(false)}
+        countdown={countdown}
+      />
+    </AuthContext.Provider>
+  );
 };
