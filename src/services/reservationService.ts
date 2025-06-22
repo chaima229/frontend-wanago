@@ -44,6 +44,24 @@ class ReservationServiceImpl {
     const response = await ApiService.post('/reservations', reservationData);
     return response;
   }
+
+  async createEventReservation(event: any, user: any): Promise<any> {
+    const reservationPayload = {
+      itemType: 'event',
+      itemId: event._id || event.id,
+      date: event.dateStart,
+      participants: 1, // ou adaptez selon votre logique
+      customerInfo: {
+        fullName: user?.fullName || '',
+        email: user?.email || '',
+        phone: user?.phone || '',
+      },
+      price: event.price,
+      totalAmount: event.price,
+    };
+    const response = await ApiService.post('/reservations', reservationPayload);
+    return response;
+  }
 }
 
 export const ReservationService = new ReservationServiceImpl();
