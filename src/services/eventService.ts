@@ -48,4 +48,33 @@ export class EventService {
       throw new Error("Erreur lors de la récupération de l'événement.");
     }
   }
+
+  static async getAllEventsForAdmin(): Promise<Event[]> {
+    try {
+      const response = await ApiService.get<Event[]>('/events/admin/all');
+      return response;
+    } catch (error) {
+      console.error('Get all events for admin error:', error);
+      throw new Error('Erreur lors de la récupération des événements pour l\'admin.');
+    }
+  }
+
+  static async updateEvent(id: string, eventData: Partial<Event>): Promise<Event> {
+    try {
+      const response = await ApiService.put<{ event: Event }>(`/events/${id}`, eventData);
+      return response.event;
+    } catch (error) {
+      console.error(`Update event ${id} error:`, error);
+      throw new Error("Erreur lors de la mise à jour de l'événement.");
+    }
+  }
+
+  static async deleteEvent(id: string): Promise<void> {
+    try {
+      await ApiService.delete(`/events/${id}`);
+    } catch (error) {
+      console.error(`Delete event ${id} error:`, error);
+      throw new Error("Erreur lors de la suppression de l'événement.");
+    }
+  }
 } 
