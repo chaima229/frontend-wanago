@@ -17,26 +17,144 @@ import { Loader2 } from 'lucide-react';
 import { uploadImage } from '@/services/storageService';
 import { Label } from "@/components/ui/label"
 
+const MOROCCAN_LOCATIONS = [
+    // Casablanca
+    { name: "Casablanca - Centre-ville", lat: 33.5731, lon: -7.5898 },
+    { name: "Casablanca - Ain Diab", lat: 33.5952, lon: -7.6324 },
+    { name: "Casablanca - Corniche", lat: 33.6089, lon: -7.6328 },
+    { name: "Casablanca - Derb Sultan", lat: 33.5589, lon: -7.6324 },
+    { name: "Casablanca - Maârif", lat: 33.5952, lon: -7.6324 },
+    { name: "Casablanca - Sidi Belyout", lat: 33.6089, lon: -7.6328 },
+    { name: "Casablanca - Hassan", lat: 33.5589, lon: -7.6324 },
+    { name: "Casablanca - Roches Noires", lat: 33.5952, lon: -7.6324 },
+    { name: "Casablanca - Ain Sebaa", lat: 33.6089, lon: -7.6328 },
+    { name: "Casablanca - Sidi Moumen", lat: 33.5589, lon: -7.6324 },
+    
+    // Rabat
+    { name: "Rabat - Agdal", lat: 34.0209, lon: -6.8416 },
+    { name: "Rabat - Hassan", lat: 34.0224, lon: -6.8341 },
+    { name: "Rabat - Souissi", lat: 34.0089, lon: -6.8516 },
+    { name: "Rabat - Hay Riad", lat: 34.0089, lon: -6.8516 },
+    { name: "Rabat - Yacoub El Mansour", lat: 34.0089, lon: -6.8516 },
+    { name: "Rabat - Salé", lat: 34.0333, lon: -6.8167 },
+    { name: "Rabat - Temara", lat: 33.9167, lon: -6.9167 },
+    { name: "Rabat - Skhirat", lat: 33.8500, lon: -7.0333 },
+    
+    // Salé
+    { name: "Salé - Médina", lat: 34.0333, lon: -6.8167 },
+    { name: "Salé - Bettana", lat: 34.0333, lon: -6.8167 },
+    { name: "Salé - Tabriquet", lat: 34.0333, lon: -6.8167 },
+    { name: "Salé - Hay Salam", lat: 34.0333, lon: -6.8167 },
+    { name: "Salé - Sidi Moussa", lat: 34.0333, lon: -6.8167 },
+    
+    // Marrakech
+    { name: "Marrakech - Médina", lat: 31.6295, lon: -7.9811 },
+    { name: "Marrakech - Gueliz", lat: 31.6343, lon: -8.0084 },
+    { name: "Marrakech - Palmeraie", lat: 31.6531, lon: -8.0122 },
+    { name: "Marrakech - Hivernage", lat: 31.6405, lon: -7.9996 },
+    { name: "Marrakech - Majorelle", lat: 31.6339, lon: -8.0060 },
+    { name: "Marrakech - Kasbah", lat: 31.6274, lon: -7.9855 },
+    { name: "Marrakech - Agdal", lat: 31.6452, lon: -7.9960 },
+    { name: "Marrakech - Mellah", lat: 31.6319, lon: -7.9776 },
+    { name: "Marrakech - Riad Zitoun", lat: 31.6292, lon: -7.9823 },
+    { name: "Marrakech - Targa", lat: 31.6410, lon: -8.0200 },
+    
+    // Agadir
+    { name: "Agadir - Centre-ville", lat: 30.4278, lon: -9.5981 },
+    { name: "Agadir - Talborjt", lat: 30.4278, lon: -9.5981 },
+    { name: "Agadir - Founty", lat: 30.4278, lon: -9.5981 },
+    { name: "Agadir - Hay Hassani", lat: 30.4278, lon: -9.5981 },
+    { name: "Agadir - Anza", lat: 30.4278, lon: -9.5981 },
+    { name: "Agadir - Tikiouine", lat: 30.4278, lon: -9.5981 },
+    { name: "Agadir - Al Houda", lat: 30.4278, lon: -9.5981 },
+    { name: "Agadir - Dakhla", lat: 30.4278, lon: -9.5981 },
+    { name: "Agadir - Cité Dakhla", lat: 30.4278, lon: -9.5981 },
+    
+    // Fès
+    { name: "Fès - Médina", lat: 34.0181, lon: -5.0078 },
+    { name: "Fès - Jdid", lat: 34.0181, lon: -5.0078 },
+    { name: "Fès - Ville Nouvelle", lat: 34.0181, lon: -5.0078 },
+    { name: "Fès - Agdal", lat: 34.0181, lon: -5.0078 },
+    { name: "Fès - Saiss", lat: 34.0181, lon: -5.0078 },
+    { name: "Fès - Ain Chkef", lat: 34.0181, lon: -5.0078 },
+    
+    // Tanger
+    { name: "Tanger - Médina", lat: 35.7595, lon: -5.8340 },
+    { name: "Tanger - Ville Nouvelle", lat: 35.7595, lon: -5.8340 },
+    { name: "Tanger - Malabata", lat: 35.7595, lon: -5.8340 },
+    { name: "Tanger - Marshan", lat: 35.7595, lon: -5.8340 },
+    { name: "Tanger - Charf", lat: 35.7595, lon: -5.8340 },
+    { name: "Tanger - Beni Makada", lat: 35.7595, lon: -5.8340 },
+    
+    // Meknès
+    { name: "Meknès - Médina", lat: 33.8935, lon: -5.5473 },
+    { name: "Meknès - Ville Nouvelle", lat: 33.8935, lon: -5.5473 },
+    { name: "Meknès - Agdal", lat: 33.8935, lon: -5.5473 },
+    { name: "Meknès - Hay Salam", lat: 33.8935, lon: -5.5473 },
+    { name: "Meknès - Al Bassatine", lat: 33.8935, lon: -5.5473 },
+    
+    // Oujda
+    { name: "Oujda - Centre-ville", lat: 34.6814, lon: -1.9086 },
+    { name: "Oujda - Médina", lat: 34.6814, lon: -1.9086 },
+    { name: "Oujda - Ville Nouvelle", lat: 34.6814, lon: -1.9086 },
+    { name: "Oujda - Al Qods", lat: 34.6814, lon: -1.9086 },
+    
+    // Tétouan
+    { name: "Tétouan - Médina", lat: 35.5711, lon: -5.3724 },
+    { name: "Tétouan - Ville Nouvelle", lat: 35.5711, lon: -5.3724 },
+    { name: "Tétouan - Malaliyine", lat: 35.5711, lon: -5.3724 },
+    { name: "Tétouan - M'diq", lat: 35.5711, lon: -5.3724 },
+    
+    // Safi
+    { name: "Safi - Médina", lat: 32.2833, lon: -9.2333 },
+    { name: "Safi - Ville Nouvelle", lat: 32.2833, lon: -9.2333 },
+    { name: "Safi - Jorf Lasfar", lat: 32.2833, lon: -9.2333 },
+    
+    // El Jadida
+    { name: "El Jadida - Médina", lat: 33.2333, lon: -8.5000 },
+    { name: "El Jadida - Ville Nouvelle", lat: 33.2333, lon: -8.5000 },
+    { name: "El Jadida - Haouzia", lat: 33.2333, lon: -8.5000 },
+    
+    // Essaouira
+    { name: "Essaouira - Médina", lat: 31.5085, lon: -9.7595 },
+    { name: "Essaouira - Ville Nouvelle", lat: 31.5085, lon: -9.7595 },
+    { name: "Essaouira - Diabat", lat: 31.5085, lon: -9.7595 },
+    
+    // Chefchaouen
+    { name: "Chefchaouen - Médina", lat: 35.1714, lon: -5.2697 },
+    { name: "Chefchaouen - Ville Nouvelle", lat: 35.1714, lon: -5.2697 },
+    { name: "Chefchaouen - Ras El Maa", lat: 35.1714, lon: -5.2697 },
+  ];
+
 const eventSchema = z.object({
-  title: z.string().min(3, 'Le titre doit contenir au moins 3 caractères.'),
-  description: z.string().min(10, 'La description doit contenir au moins 10 caractères.'),
-  dateStart: z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Date de début invalide." }),
+  title: z.string().min(3, "Le titre doit contenir au moins 3 caractères."),
+  description: z
+    .string()
+    .min(10, "La description doit contenir au moins 10 caractères."),
+  dateStart: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+      message: "Date de début invalide.",
+    }),
   dateEnd: z.string().optional(),
   price: z.preprocess(
-    (a) => parseFloat(z.string().parse(a)),
+    (val) => (String(val).trim() === "" ? undefined : parseFloat(String(val).replace(",", "."))),
     z.number().min(0, "Le prix doit être un nombre positif.").optional()
   ),
   capacity: z.preprocess(
-    (a) => parseInt(z.string().parse(a), 10),
-    z.number().min(0, "La capacité doit être un nombre positif.").optional()
+    (val) => (String(val).trim() === "" ? undefined : parseInt(String(val), 10)),
+    z.number().int().min(0, "La capacité doit être un nombre entier positif.").optional()
   ),
   category: z.string().min(1, "La catégorie est requise."),
   location: z.object({
-      type: z.literal('Point'),
-      coordinates: z.array(z.number()).length(2)
+    type: z.literal("Point"),
+    coordinates: z.tuple([
+      z.preprocess((val) => val ? parseFloat(String(val)) : 0, z.number()),
+      z.preprocess((val) => val ? parseFloat(String(val)) : 0, z.number()),
+    ]),
   }),
   photos: z.any().optional(),
-  imageUrl: z.string().url().optional().or(z.literal('')),
+  imageUrl: z.string().url().optional().or(z.literal("")),
 });
 
 type EventFormData = z.infer<typeof eventSchema>;
@@ -77,27 +195,32 @@ const EventForm = () => {
       
       let imageUrl = '';
       if (eventData.photos && eventData.photos.length > 0) {
-        // If the photo seems to be a Firebase Storage URL, we assume it's a URL type
-        if(eventData.photos[0].includes('firebasestorage.googleapis.com')) {
-          setUploadType('upload'); // Keep it as upload to show it can be replaced
-        } else {
+        if(!eventData.photos[0].includes('firebasestorage.googleapis.com')) {
           setUploadType('url');
           imageUrl = eventData.photos[0];
         }
       }
       
-      form.reset({
-        title: eventData.title,
-        description: eventData.description,
-        dateStart: new Date(eventData.dateStart).toISOString().substring(0, 16),
+      const sanitizedData = {
+        title: eventData.title || '',
+        description: eventData.description || '',
+        dateStart: eventData.dateStart ? new Date(eventData.dateStart).toISOString().substring(0, 16) : '',
         dateEnd: eventData.dateEnd ? new Date(eventData.dateEnd).toISOString().substring(0, 16) : '',
-        price: eventData.price,
-        capacity: eventData.capacity,
-        category: eventData.category,
-        location: { type: 'Point', coordinates: coordinates },
-        imageUrl: imageUrl,
-        photos: eventData.photos
-      });
+        price: eventData.price ?? 0,
+        capacity: eventData.capacity ?? 0,
+        category: eventData.category || '',
+        location: { 
+          type: 'Point' as const, 
+          coordinates: [
+            coordinates[0] ?? 0,
+            coordinates[1] ?? 0
+          ]
+        },
+        imageUrl: imageUrl || '',
+        photos: eventData.photos || []
+      };
+
+      form.reset(sanitizedData);
     }
   }, [eventData, isEditMode, form]);
 
@@ -117,9 +240,9 @@ const EventForm = () => {
             ...data,
             photos: finalImageUrl ? [finalImageUrl] : [],
             dateStart: new Date(data.dateStart).toISOString(),
-            dateEnd: data.dateEnd ? new Date(data.dateEnd).toISOString() : undefined
+            dateEnd: (data.dateEnd && data.dateEnd.length > 0) ? new Date(data.dateEnd).toISOString() : undefined,
         };
-      return isEditMode ? EventService.updateEvent(id!, payload) : EventService.createEvent(payload);
+      return isEditMode ? EventService.updateEvent(id!, payload as Partial<Event>) : EventService.createEvent(payload as Partial<Event>);
     },
     onSuccess: () => {
       toast({
@@ -141,6 +264,13 @@ const EventForm = () => {
     mutation.mutate(data);
   };
 
+  // Log validation errors to the console for debugging
+  useEffect(() => {
+    if (Object.keys(form.formState.errors).length > 0) {
+      console.log("Validation Errors:", form.formState.errors);
+    }
+  }, [form.formState.errors]);
+
   if (isEditMode && isLoadingEvent) {
     return <div className="flex justify-center items-center h-64"><Loader2 className="h-8 w-8 animate-spin" /></div>;
   }
@@ -157,13 +287,25 @@ const EventForm = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <CardContent className="space-y-6">
+              {form.formState.errors && Object.keys(form.formState.errors).length > 0 && (
+                <div className="p-4 mb-4 text-sm text-destructive-foreground bg-destructive rounded-lg" role="alert">
+                  <span className="font-bold">Erreur de validation.</span> Veuillez corriger les champs en surbrillance.
+                </div>
+              )}
+
                <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Titre</FormLabel>
-                    <FormControl><Input placeholder="Titre de l'événement" {...field} /></FormControl>
+                    <FormControl>
+                      <Input
+                        placeholder="Titre de l'événement"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -175,7 +317,13 @@ const EventForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
-                    <FormControl><Textarea placeholder="Description de l'événement" {...field} /></FormControl>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Description de l'événement"
+                        {...field}
+                        value={field.value ?? ""}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -188,7 +336,13 @@ const EventForm = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Date de début</FormLabel>
-                      <FormControl><Input type="datetime-local" {...field} /></FormControl>
+                      <FormControl>
+                        <Input
+                          type="datetime-local"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -199,7 +353,13 @@ const EventForm = () => {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Date de fin (optionnel)</FormLabel>
-                      <FormControl><Input type="datetime-local" {...field} /></FormControl>
+                      <FormControl>
+                        <Input
+                          type="datetime-local"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -213,7 +373,15 @@ const EventForm = () => {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Prix (MAD)</FormLabel>
-                        <FormControl><Input type="number" step="0.01" placeholder="ex: 100" {...field} /></FormControl>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            placeholder="ex: 100"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -224,7 +392,14 @@ const EventForm = () => {
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Capacité</FormLabel>
-                        <FormControl><Input type="number" placeholder="ex: 50" {...field} /></FormControl>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            placeholder="ex: 50"
+                            {...field}
+                            value={field.value ?? ""}
+                          />
+                        </FormControl>
                         <FormMessage />
                         </FormItem>
                     )}
@@ -237,19 +412,22 @@ const EventForm = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Catégorie</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                            <SelectTrigger>
-                            <SelectValue placeholder="Sélectionnez une catégorie" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            <SelectItem value="Concert">Concert</SelectItem>
-                            <SelectItem value="Festival">Festival</SelectItem>
-                            <SelectItem value="Sport">Sport</SelectItem>
-                            <SelectItem value="Art">Art</SelectItem>
-                            <SelectItem value="Conférence">Conférence</SelectItem>
-                        </SelectContent>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value ?? ""}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez une catégorie" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="Concert">Concert</SelectItem>
+                        <SelectItem value="Festival">Festival</SelectItem>
+                        <SelectItem value="Sport">Sport</SelectItem>
+                        <SelectItem value="Art">Art</SelectItem>
+                        <SelectItem value="Conférence">Conférence</SelectItem>
+                      </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
@@ -259,7 +437,7 @@ const EventForm = () => {
               <FormItem>
                 <FormLabel>Source de l'image</FormLabel>
                 <RadioGroup
-                  defaultValue={uploadType}
+                  value={uploadType}
                   onValueChange={(value) => setUploadType(value)}
                   className="flex items-center space-x-4"
                 >
@@ -300,7 +478,11 @@ const EventForm = () => {
                     <FormItem>
                       <FormLabel>URL de l'image</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://example.com/image.jpg" {...field} />
+                        <Input
+                          placeholder="https://example.com/image.jpg"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -308,30 +490,31 @@ const EventForm = () => {
                 />
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="location.coordinates.0"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Latitude</FormLabel>
-                      <FormControl><Input type="number" step="any" placeholder="ex: 33.5731" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="location.coordinates.1"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Longitude</FormLabel>
-                      <FormControl><Input type="number" step="any" placeholder="ex: -7.5898" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
+              <FormItem>
+                <FormLabel>Emplacement</FormLabel>
+                <Select
+                  onValueChange={(locationName) => {
+                    const selectedLocation = MOROCCAN_LOCATIONS.find(loc => loc.name === locationName);
+                    if (selectedLocation) {
+                      form.setValue('location.coordinates', [selectedLocation.lat, selectedLocation.lon]);
+                    }
+                  }}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Sélectionnez un emplacement" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {MOROCCAN_LOCATIONS.map((loc) => (
+                      <SelectItem key={loc.name} value={loc.name}>
+                        {loc.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
 
             </CardContent>
             <CardFooter>
