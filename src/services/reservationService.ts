@@ -39,6 +39,11 @@ class ReservationServiceImpl {
     const response = await ApiService.get<Reservation>(`/reservations/${id}`);
     return response;
   }
+
+  async createRestaurantReservation(reservationData: any): Promise<any> {
+    const response = await ApiService.post('/reservations', reservationData);
+    return response;
+  }
 }
 
 export const ReservationService = new ReservationServiceImpl();

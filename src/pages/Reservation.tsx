@@ -89,10 +89,11 @@ const Reservation = () => {
       const totalAmount = restaurantPrice * (reservationData.guests || 1);
       
       const reservationPayload = {
-        restaurantId: reservationData.restaurant.id,
+        itemType: 'restaurant',
+        itemId: reservationData.restaurant.id,
         date: reservationData.date,
         time: selectedTime,
-        guests: reservationData.guests,
+        participants: reservationData.guests,
         customerInfo,
         price: restaurantPrice,
         totalAmount: totalAmount,
