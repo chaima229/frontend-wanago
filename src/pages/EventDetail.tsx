@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EventService, Event } from '@/services/eventService';
-import { ReservationService } from '@/services/reservationService';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useReservation } from '@/contexts/ReservationContext';
 import { Loader2, Calendar, MapPin, Tag, Users, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,10 +12,10 @@ const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { updateReservation } = useReservation();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
-  const [reserving, setReserving] = useState(false);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -41,35 +41,34 @@ const EventDetail = () => {
     fetchEvent();
   }, [id, toast]);
 
-  const handleReserveClick = async () => {
+  const handleReserveClick = () => {
     if (!isAuthenticated) {
       toast({
         title: "Connexion requise",
         description: "Vous devez être connecté pour réserver.",
         variant: "destructive",
       });
-      navigate('/auth');
+      navigate('/login');
       return;
     }
-    if (!event || !user) return;
+    if (!event) return;
 
-    setReserving(true);
-    try {
-      await ReservationService.createEventReservation(event, user);
-      toast({
-        title: "Réservation réussie !",
-        description: `Votre place pour l'événement "${event.title}" a été réservée.`,
-      });
-      navigate('/dashboard');
-    } catch (error) {
-      toast({
-        title: "Échec de la réservation",
-        description: error instanceof Error ? error.message : "Une erreur inconnue est survenue.",
-        variant: "destructive",
-      });
-    } finally {
-      setReserving(false);
-    }
+    // Mettre à jour le contexte avec les infos de l'événement
+    updateReservation({
+      event: {
+        _id: event._id,
+        title: event.title,
+        description: event.description,
+        dateStart: event.dateStart,
+        photos: event.photos,
+        price: event.price
+      },
+      // Effacer les données de restaurant au cas où
+      restaurant: undefined,
+    });
+    
+    // Rediriger vers la page de finalisation
+    navigate('/reservation-event');
   };
 
   if (loading) {
@@ -130,8 +129,7 @@ const EventDetail = () => {
                             <span>Prix:</span>
                             <span className="text-primary">{event.price} MAD</span>
                         </div>
-                        <Button onClick={handleReserveClick} disabled={reserving} size="lg" className="w-full">
-                            {reserving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        <Button onClick={handleReserveClick} size="lg" className="w-full">
                             Réserver maintenant
                         </Button>
                     </Card>

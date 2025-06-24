@@ -13,8 +13,18 @@ interface Restaurant {
   priceRange?: string;
 }
 
+interface Event {
+  _id: string;
+  title: string;
+  description: string;
+  dateStart: string;
+  photos?: string[];
+  price: number;
+}
+
 interface ReservationData {
   restaurant?: Restaurant;
+  event?: Event;
   date?: string;
   time?: string;
   guests?: number;

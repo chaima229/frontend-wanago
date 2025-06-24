@@ -40,6 +40,7 @@ import RedirectAuthenticatedRoute from "./components/RedirectAuthenticatedRoute"
 import LeaveReviewPage from './pages/LeaveReviewPage';
 import Reservations from './pages/admin/Reservations';
 import ManageReviews from './pages/admin/ManageReviews';
+import ReservationEventPage from './pages/reservation-event';
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,14 @@ const App = () => (
                     element={
                       <ProtectedRoute>
                         <Reservation />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/reservation-event"
+                    element={
+                      <ProtectedRoute>
+                        <ReservationEventPage />
                       </ProtectedRoute>
                     }
                   />
