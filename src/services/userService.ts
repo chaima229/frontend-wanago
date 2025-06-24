@@ -7,6 +7,7 @@ export interface User {
   email: string;
   role: string;
   uid: string;
+  isValidated: boolean;
 }
 
 class UserServiceImpl {
@@ -44,6 +45,11 @@ class UserServiceImpl {
 
   async getUserById(id: string): Promise<User> {
     const response = await ApiService.get<User>(`/users/${id}`);
+    return response;
+  }
+
+  async checkUserValidation(userId: string): Promise<{ isValidated: boolean }> {
+    const response = await ApiService.get<{ isValidated: boolean }>(`/users/${userId}/check-validation`);
     return response;
   }
 }

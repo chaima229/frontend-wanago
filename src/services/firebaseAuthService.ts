@@ -19,6 +19,7 @@ export interface User {
   email: string;
   role?: string; // Ajouter le rôle optionnel
   phone?: string;
+  isValidated?: boolean;
 }
 
 export class FirebaseAuthService {

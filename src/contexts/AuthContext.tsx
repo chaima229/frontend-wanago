@@ -2,10 +2,14 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { FirebaseAuthService, User } from '../services/firebaseAuthService';
-import { UserService } from '../services/userService';
+import { UserService, User as BackendUser } from '../services/userService';
 import { useToast } from '@/hooks/use-toast';
 import { ApiService } from '@/services/api';
 import SessionTimeoutModal from '@/components/SessionTimeoutModal';
+
+interface User extends BackendUser {
+  // This combines properties from Firebase and Backend
+}
 
 interface AuthContextType {
   user: User | null;
@@ -14,7 +18,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>;
   register: (fullName: string, email: string, password: string) => Promise<boolean>;
   loginWithGoogle: () => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: (options?: { isInactive?: boolean; isBlocked?: boolean }) => Promise<void>;
   loading: boolean;
 }
 
@@ -38,47 +42,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAuthenticated = !!user;
 
-  // Fonction pour récupérer les données utilisateur depuis la base
-  const fetchUserData = async (firebaseUser: FirebaseUser) => {
-    try {
-      const userData = await UserService.getUserByUid(firebaseUser.uid);
-      if (userData) {
-        return {
-          id: firebaseUser.uid,
-          _id: userData._id, // Ajout de l'ID de la base de données
-          fullName: userData.fullName,
-          email: firebaseUser.email!,
-          role: userData.role
-        };
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-    
-    // Fallback si pas de données en base
-    const fallbackUser = FirebaseAuthService.convertFirebaseUser(firebaseUser);
-    return {
-      ...fallbackUser,
-      role: 'user' // Rôle par défaut
-    };
-  };
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
-      setFirebaseUser(fbUser);
-      if (fbUser) {
-        const customUser = await fetchUserData(fbUser);
-        setUser(customUser);
-      } else {
-        setUser(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const logout = useCallback(async (isInactive = false): Promise<void> => {
+  const logout = useCallback(async (options: { isInactive?: boolean; isBlocked?: boolean } = {}): Promise<void> => {
+    const { isInactive = false, isBlocked = false } = options;
     try {
       setLoading(true);
       await FirebaseAuthService.logout();
@@ -89,12 +54,76 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           variant: "destructive"
         });
       }
+      if (isBlocked) {
+        toast({
+          title: "Accès bloqué",
+          description: "Votre compte a été bloqué par un administrateur.",
+          variant: "destructive"
+        });
+      }
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
+      setUser(null);
+      setFirebaseUser(null);
       setLoading(false);
     }
   }, [toast]);
+
+  // Fonction pour récupérer les données utilisateur depuis la base
+  const fetchUserData = async (firebaseUser: FirebaseUser) => {
+    try {
+      const userData = await UserService.getUserByUid(firebaseUser.uid);
+      if (userData) {
+        if (!userData.isValidated) {
+          await logout({ isBlocked: true });
+          return null;
+        }
+        return {
+          ...userData,
+          id: firebaseUser.uid,
+          email: firebaseUser.email!,
+        };
+      }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      await logout();
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (fbUser) => {
+      if (fbUser) {
+        setFirebaseUser(fbUser);
+        const customUser = await fetchUserData(fbUser);
+        setUser(customUser as User);
+      } else {
+        setUser(null);
+        setFirebaseUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!user?._id) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const { isValidated } = await UserService.checkUserValidation(user._id);
+        if (!isValidated) {
+          await logout({ isBlocked: true });
+        }
+      } catch (error) {
+        console.error("Error checking user validation status:", error);
+      }
+    }, 30 * 1000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [user?._id, logout]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -145,7 +174,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     const handleLogout = async (isInactive = false) => {
         setIsModalOpen(false);
-        await logout(isInactive);
+        await logout({ isInactive });
     };
 
     const events = ['mousemove', 'keydown', 'click', 'scroll'];
@@ -158,7 +187,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       events.forEach(event => window.removeEventListener(event, resetTimers));
     };
   }, [isAuthenticated, logout]);
-
 
   const login = async (email: string, password: string): Promise<boolean> => {
     try {
@@ -206,7 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     login,
     register,
     loginWithGoogle,
-    logout,
+    logout: (options) => logout(options),
     loading,
   };
 
@@ -219,7 +247,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsModalOpen(false);
           // The reset timers logic will be handled by the main event listeners
         }}
-        onLogout={() => logout(false)}
+        onLogout={() => logout()}
         countdown={countdown}
       />
     </AuthContext.Provider>
