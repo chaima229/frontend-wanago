@@ -126,15 +126,19 @@ const AdminReservations = () => {
                             </Tooltip>
                             <AlertDialog>
                               <Tooltip>
-                                <TooltipTrigger asChild>
+                                <TooltipTrigger asChild disabled={reservation.status === 'confirmed'}>
                                   <AlertDialogTrigger asChild>
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="icon" disabled={reservation.status === 'confirmed'}>
                                       <Trash2 className="h-4 w-4 text-destructive" />
                                     </Button>
                                   </AlertDialogTrigger>
                                 </TooltipTrigger>
                                 <TooltipContent>
-                                  <p>Supprimer la réservation</p>
+                                  {reservation.status === 'confirmed' ? (
+                                    <p>Les réservations confirmées ne peuvent pas être supprimées</p>
+                                  ) : (
+                                    <p>Supprimer la réservation</p>
+                                  )}
                                 </TooltipContent>
                               </Tooltip>
                               <AlertDialogContent>
