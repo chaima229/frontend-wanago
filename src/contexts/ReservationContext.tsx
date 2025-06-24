@@ -7,6 +7,7 @@ interface Restaurant {
   description: string;
   address: string;
   ville: string;
+  photos?: string[];
   location: any;
   price: number;
   priceRange?: string;

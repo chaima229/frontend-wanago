@@ -3,14 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { useReservation } from '../contexts/ReservationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ReservationService } from '../services/reservationService';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DatePicker from '@/components/DatePicker';
 
 const Reservation = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { reservationData, updateReservation } = useReservation();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -25,7 +27,40 @@ const Reservation = () => {
     phone: '',
   });
   const [selectedTime, setSelectedTime] = useState(reservationData.time || '');
-  const [loading, setLoading] = useState(false);
+
+  const createReservationMutation = useMutation({
+    mutationFn: ReservationService.createRestaurantReservation,
+    onSuccess: (response) => {
+      queryClient.invalidateQueries({ queryKey: ['notifications', user?._id] });
+      
+      if (!response || !response.reservation || !response.reservation._id) {
+        throw new Error('Réponse invalide du serveur: ID de réservation manquant');
+      }
+      
+      updateReservation({ 
+        customerInfo,
+        time: selectedTime,
+        reservationId: response.reservation._id,
+        price: reservationData.restaurant.price || 0,
+        totalAmount: (reservationData.restaurant.price || 0) * (reservationData.guests || 1),
+      });
+      
+      toast({
+        title: 'Réservation créée !',
+        description: 'Votre réservation a été créée avec succès. Vous allez être redirigé.',
+      });
+      
+      navigate('/');
+    },
+    onError: (error) => {
+      console.error('Reservation error:', error);
+      toast({
+        title: 'Erreur',
+        description: 'Erreur lors de la création de la réservation. Veuillez réessayer.',
+        variant: 'destructive',
+      });
+    }
+  });
 
   const availableTimes = [
     '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30', '22:00'
@@ -43,7 +78,7 @@ const Reservation = () => {
     updateReservation({ time });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!reservationData.date) {
@@ -82,53 +117,20 @@ const Reservation = () => {
       return;
     }
 
-    setLoading(true);
+    const restaurantPrice = reservationData.restaurant.price || 0;
+      
+    const reservationPayload = {
+      itemType: 'restaurant',
+      itemId: reservationData.restaurant.id,
+      date: reservationData.date,
+      time: selectedTime,
+      participants: reservationData.guests,
+      customerInfo,
+      price: restaurantPrice,
+      totalAmount: restaurantPrice * (reservationData.guests || 1),
+    };
     
-    try {
-      const restaurantPrice = reservationData.restaurant.price || 0;
-      const totalAmount = restaurantPrice * (reservationData.guests || 1);
-      
-      const reservationPayload = {
-        itemType: 'restaurant',
-        itemId: reservationData.restaurant.id,
-        date: reservationData.date,
-        time: selectedTime,
-        participants: reservationData.guests,
-        customerInfo,
-        price: restaurantPrice,
-        totalAmount: totalAmount,
-      };
-
-      const response = await ReservationService.createRestaurantReservation(reservationPayload);
-      
-      if (!response || !response.reservation || !response.reservation._id) {
-        throw new Error('Réponse invalide du serveur: ID de réservation manquant');
-      }
-      
-      updateReservation({ 
-        customerInfo,
-        time: selectedTime,
-        reservationId: response.reservation._id,
-        price: restaurantPrice,
-        totalAmount: totalAmount
-      });
-      
-      toast({
-        title: 'Réservation confirmée !',
-        description: 'Votre réservation a été créée avec succès.',
-      });
-      
-      navigate('/confirmation');
-    } catch (error) {
-      console.error('Reservation error:', error);
-      toast({
-        title: 'Erreur',
-        description: 'Erreur lors de la création de la réservation. Veuillez réessayer.',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
+    createReservationMutation.mutate(reservationPayload);
   };
 
   const handleCancel = () => {
@@ -335,12 +337,13 @@ const Reservation = () => {
                 </div>
               </div>
 
-              <Button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-foreground py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 disabled:opacity-50"
+              <Button 
+                type="submit" 
+                className="w-full text-lg py-6 bg-gradient-to-r from-purple-600 to-blue-600 hover:opacity-90 transition-opacity"
+                disabled={createReservationMutation.isPending}
               >
-                {loading ? 'Création en cours...' : 'Confirmer la réservation'}
+                {createReservationMutation.isPending && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                Confirmer et continuer
               </Button>
             </form>
           </div>
