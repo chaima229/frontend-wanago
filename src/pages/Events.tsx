@@ -1,194 +1,139 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
-import { EventService, Event } from '@/services/eventService';
-import { useToast } from '@/hooks/use-toast';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
+import React, { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { EventService } from '@/services/eventService';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Star } from 'lucide-react';
 
-// --- Déplacé et adapté depuis EventMap.tsx ---
-const createEventIcon = () => {
-  return L.divIcon({
-    html: `
-      <div style="
-        background-color: #3498db; // Couleur bleue pour les événements
-        width: 30px;
-        height: 30px;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      ">
-        <div style="
-          transform: rotate(45deg);
-          color: white;
-          font-size: 16px;
-          font-weight: bold;
-          text-align: center;
-          line-height: 1;
-        ">🎉</div>
+const categories = [
+  'Concert', 'Exposition', 'Festival', 'Conférence', 'Atelier', 'Autre'
+];
+const formats = [
+  'Présentiel', 'En ligne', 'Hybride'
+];
+const priceRanges = [
+  { label: 'Gratuit', value: 'free' },
+  { label: 'Payant', value: 'paid' },
+];
+const sortOptions = [
+  { label: 'Pertinence', value: 'relevance' },
+  { label: 'Prix croissant', value: 'price-asc' },
+  { label: 'Prix décroissant', value: 'price-desc' },
+  { label: 'Note', value: 'rating' },
+];
+
+const EventCard = ({ event }: { event: any }) => (
+  <div className="bg-muted rounded-lg p-4 flex flex-col gap-2 shadow hover:shadow-lg transition cursor-pointer">
+    <div className="flex items-center gap-2">
+      <img src={event.photos?.[0] || '/placeholder.svg'} alt={event.title} className="w-12 h-12 rounded object-cover bg-gray-200" />
+      <div>
+        <div className="font-bold text-lg">{event.title}</div>
+        <div className="text-xs text-muted-foreground">{event.ville}</div>
       </div>
-    `,
-    className: 'custom-marker',
-    iconSize: [30, 30],
-    iconAnchor: [15, 30],
-    popupAnchor: [0, -30]
-  });
-};
-// --- Fin du code déplacé ---
+    </div>
+    <div className="flex items-center gap-1 text-yellow-500">
+      {[...Array(5)].map((_, i) => (
+        <Star key={i} className={i < Math.round(event.rating || 4) ? 'fill-yellow-500' : 'text-gray-400'} />
+      ))}
+      <span className="ml-2 text-xs text-muted-foreground">{event.rating?.toFixed(1) || '4.0'}</span>
+    </div>
+    <div className="text-sm text-muted-foreground line-clamp-2">{event.description}</div>
+    <div className="flex items-center justify-between mt-auto">
+      <span className="font-bold text-primary">{event.price} MAD</span>
+      <Button size="sm" variant="outline">Voir</Button>
+    </div>
+  </div>
+);
 
 const Events = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  const [events, setEvents] = useState<Event[]>([]);
-  const [pageLoading, setPageLoading] = useState(true);
+  const { data: events = [] } = useQuery({
+    queryKey: ['events'],
+    queryFn: () => EventService.getAllEvents(),
+  });
+  const [search, setSearch] = useState('');
+  const [ville, setVille] = useState('');
+  const [category, setCategory] = useState('');
+  const [format, setFormat] = useState('');
+  const [price, setPrice] = useState('');
+  const [sort, setSort] = useState('relevance');
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setPageLoading(true);
-        const eventsList = await EventService.getAllEvents();
-        setEvents(eventsList);
-      } catch (error) {
-        console.error('Error fetching events:', error);
-         toast({
-          title: 'Erreur',
-          description: 'Impossible de charger les événements.',
-          variant: 'destructive',
-        });
-      } finally {
-        setPageLoading(false);
-      }
-    };
-    fetchEvents();
-  }, [toast]);
+  // Villes disponibles
+  const villes = useMemo(() => Array.from(new Set(events.map((e: any) => e.ville).filter(Boolean))), [events]);
 
-  const handleSelectEvent = (event: Event) => {
-    navigate(`/events/${event._id}`);
-  };
-
-  if (pageLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-foreground">Chargement des événements...</p>
-        </div>
-      </div>
-    );
-  }
-  
-  // Filtrer les événements valides et calculer le centre/zoom
-  const validEvents = events.filter(e => 
-    e.location && 
-    typeof e.location === 'object' && 
-    'coordinates' in e.location &&
-    Array.isArray(e.location.coordinates) && 
-    e.location.coordinates.length === 2
-  );
-
-  let center: [number, number] = [33.5731, -7.5898];
-  let zoom = 10;
-
-  if (validEvents.length > 0) {
-    const coordinates = validEvents.map(e => (e.location as any).coordinates);
-    const lats = coordinates.map(coord => coord[1]);
-    const lngs = coordinates.map(coord => coord[0]);
-    
-    const minLat = Math.min(...lats);
-    const maxLat = Math.max(...lats);
-    const minLng = Math.min(...lngs);
-    const maxLng = Math.max(...lngs);
-    
-    center = [(minLat + maxLat) / 2, (minLng + maxLng) / 2];
-    
-    const latDiff = maxLat - minLat;
-    const lngDiff = maxLng - minLng;
-    const maxDiff = Math.max(latDiff, lngDiff);
-    
-    if (maxDiff > 0.1) zoom = 8;
-    else if (maxDiff > 0.05) zoom = 9;
-    else if (maxDiff > 0.02) zoom = 10;
-    else if (maxDiff > 0.01) zoom = 11;
-    else zoom = 12;
-  }
-
+  // Filtrage
+  const filtered = useMemo(() => {
+    let list = events;
+    if (search) list = list.filter((e: any) => e.title.toLowerCase().includes(search.toLowerCase()));
+    if (ville) list = list.filter((e: any) => e.ville === ville);
+    if (category) list = list.filter((e: any) => e.category === category);
+    if (format) list = list.filter((e: any) => e.format === format);
+    if (price === 'free') list = list.filter((e: any) => e.price === 0);
+    if (price === 'paid') list = list.filter((e: any) => e.price > 0);
+    if (sort === 'price-asc') list = [...list].sort((a: any, b: any) => a.price - b.price);
+    if (sort === 'price-desc') list = [...list].sort((a: any, b: any) => b.price - a.price);
+    if (sort === 'rating') list = [...list].sort((a: any, b: any) => (b.rating || 0) - (a.rating || 0));
+    return list;
+  }, [events, search, ville, category, format, price, sort]);
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto text-center mb-12">
-            <h1 className="text-5xl font-bold text-foreground mb-6 leading-tight">
-                Découvrez nos événements
-            </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-                Cliquez sur un marqueur pour voir les détails d'un événement.
-            </p>
+      {/* Header de recherche */}
+      <div className="bg-gradient-to-b from-primary/80 to-background py-12 px-4 text-center">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Explorez les meilleurs événements</h1>
+        <div className="flex flex-col md:flex-row gap-2 justify-center items-center max-w-xl mx-auto">
+          <Input placeholder="Rechercher un événement..." value={search} onChange={e => setSearch(e.target.value)} className="w-full md:w-64" />
+          <select value={ville} onChange={e => setVille(e.target.value)} className="border rounded px-2 py-1">
+            <option value="">Toutes les villes</option>
+            {villes.map(v => <option key={v} value={v}>{v}</option>)}
+          </select>
+          <select value="" className="border rounded px-2 py-1"><option>Maroc</option></select>
         </div>
-        
-        <div className="max-w-6xl mx-auto">
-            <div className="bg-card/80 backdrop-blur-sm rounded-2xl p-8 border">
-                {validEvents.length === 0 ? (
-                <div className="text-center py-12">
-                    <p className="text-muted-foreground text-lg">Aucun événement avec une localisation valide trouvé.</p>
-                </div>
-                ) : (
-                <MapContainer center={center} zoom={zoom} style={{ height: '500px', width: '100%' }}>
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                    {validEvents.map((event) => {
-                        const customIcon = createEventIcon();
-                        const coordinates = (event.location as any).coordinates;
-                        
-                        return (
-                        <Marker
-                            key={event.id || event._id}
-                            position={[coordinates[1], coordinates[0]] as [number, number]}
-                            icon={customIcon}
-                        >
-                            <Popup>
-                            <div className="event-popup" style={{ minWidth: '200px' }}>
-                                <div style={{ 
-                                backgroundColor: '#3498db', 
-                                color: 'white', 
-                                padding: '8px', 
-                                borderRadius: '4px', 
-                                marginBottom: '8px',
-                                textAlign: 'center'
-                                }}>
-                                <strong>{event.title}</strong>
-                                </div>
-                                <div style={{ marginBottom: '8px' }}>
-                                <div><strong>Date:</strong> {new Date(event.dateStart).toLocaleDateString('fr-FR')}</div>
-                                <div><strong>Prix:</strong> {event.price} MAD</div>
-                                </div>
-                                <button 
-                                onClick={() => handleSelectEvent(event)} 
-                                style={{
-                                    backgroundColor: '#3498db',
-                                    color: 'white',
-                                    border: 'none',
-                                    padding: '8px 16px',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    width: '100%',
-                                    fontWeight: 'bold'
-                                }}
-                                >
-                                Voir les détails
-                                </button>
-                            </div>
-                            </Popup>
-                        </Marker>
-                        );
-                    })}
-                </MapContainer>
-                )}
+      </div>
+      <div className="flex">
+        {/* Sidebar filtres */}
+        <aside className="w-64 p-6 bg-card/80 border-r border-border hidden md:block">
+          <div className="mb-6">
+            <div className="font-bold mb-2">Prix</div>
+            {priceRanges.map(p => (
+              <div key={p.value} className="flex items-center gap-2 mb-1">
+                <input type="radio" id={p.value} name="price" value={p.value} checked={price === p.value} onChange={e => setPrice(e.target.value)} />
+                <label htmlFor={p.value}>{p.label}</label>
+              </div>
+            ))}
+          </div>
+          <div className="mb-6">
+            <div className="font-bold mb-2">Catégorie</div>
+            {categories.map(c => (
+              <div key={c} className="flex items-center gap-2 mb-1">
+                <input type="radio" id={c} name="category" value={c} checked={category === c} onChange={e => setCategory(e.target.value)} />
+                <label htmlFor={c}>{c}</label>
+              </div>
+            ))}
+          </div>
+          <div className="mb-6">
+            <div className="font-bold mb-2">Format</div>
+            {formats.map(f => (
+              <div key={f} className="flex items-center gap-2 mb-1">
+                <input type="radio" id={f} name="format" value={f} checked={format === f} onChange={e => setFormat(e.target.value)} />
+                <label htmlFor={f}>{f}</label>
+              </div>
+            ))}
+          </div>
+        </aside>
+        {/* Main content */}
+        <main className="flex-1 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-lg font-bold">{filtered.length} événements trouvés</div>
+            <div>
+              <select value={sort} onChange={e => setSort(e.target.value)} className="border rounded px-2 py-1">
+                {sortOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+              </select>
             </div>
-        </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((e: any) => <EventCard key={e._id || e.id} event={e} />)}
+          </div>
+        </main>
       </div>
     </div>
   );
