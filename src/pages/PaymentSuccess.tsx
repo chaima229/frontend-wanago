@@ -10,7 +10,7 @@ export default function PaymentSuccess() {
     const { isAuthenticated } = useAuth();
     const [searchParams] = useSearchParams();
     
-    const reservationId = searchParams.get('reservationId');
+    const transactionId = searchParams.get('transactionId');
     const amount = searchParams.get('amount');
     const type = searchParams.get('type'); // 'restaurant' ou 'event'
 
@@ -48,8 +48,8 @@ export default function PaymentSuccess() {
                 <CardContent className="space-y-6">
                     <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
                         <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">Numéro de réservation:</span>
-                            <span className="text-sm font-bold text-blue-800 dark:text-blue-200">#{reservationId}</span>
+                            <span className="text-sm font-medium text-blue-700 dark:text-blue-300">ID de Transaction:</span>
+                            <span className="text-sm font-bold text-blue-800 dark:text-blue-200 break-all">#{transactionId}</span>
                         </div>
                         {amount && (
                             <div className="flex items-center justify-between">
