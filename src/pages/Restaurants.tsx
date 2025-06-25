@@ -4,6 +4,7 @@ import { RestaurantService } from '@/services/restaurantService';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const sortOptions = [
   { label: 'Pertinence', value: 'relevance' },
@@ -12,28 +13,31 @@ const sortOptions = [
   { label: 'Note', value: 'rating' },
 ];
 
-const RestaurantCard = ({ restaurant }: { restaurant: any }) => (
-  <div className="bg-muted rounded-lg p-4 flex flex-col gap-2 shadow hover:shadow-lg transition cursor-pointer">
-    <div className="flex items-center gap-2">
-      <img src={restaurant.photos?.[0] || '/placeholder.svg'} alt={restaurant.name} className="w-12 h-12 rounded object-cover bg-gray-200" />
-      <div>
-        <div className="font-bold text-lg">{restaurant.name}</div>
-        <div className="text-xs text-muted-foreground">{restaurant.ville}</div>
+const RestaurantCard = ({ restaurant }: { restaurant: any }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="bg-muted rounded-lg p-4 flex flex-col gap-2 shadow hover:shadow-lg transition cursor-pointer">
+      <div className="flex items-center gap-2">
+        <img src={restaurant.photos?.[0] || '/placeholder.svg'} alt={restaurant.name} className="w-12 h-12 rounded object-cover bg-gray-200" />
+        <div>
+          <div className="font-bold text-lg">{restaurant.name}</div>
+          <div className="text-xs text-muted-foreground">{restaurant.ville}</div>
+        </div>
+      </div>
+      <div className="flex items-center gap-1 text-yellow-500">
+        {[...Array(5)].map((_, i) => (
+          <Star key={i} className={i < Math.round(restaurant.rating || 4) ? 'fill-yellow-500' : 'text-gray-400'} />
+        ))}
+        <span className="ml-2 text-xs text-muted-foreground">{restaurant.rating?.toFixed(1) || '4.0'}</span>
+      </div>
+      <div className="text-sm text-muted-foreground line-clamp-2">{restaurant.description}</div>
+      <div className="flex items-center justify-between mt-auto">
+        <span className="font-bold text-primary">{restaurant.price} MAD</span>
+        <Button size="sm" className="bg-primary text-white hover:bg-primary/90" onClick={() => navigate(`/restaurants/${restaurant._id || restaurant.id}`)}>Voir</Button>
       </div>
     </div>
-    <div className="flex items-center gap-1 text-yellow-500">
-      {[...Array(5)].map((_, i) => (
-        <Star key={i} className={i < Math.round(restaurant.rating || 4) ? 'fill-yellow-500' : 'text-gray-400'} />
-      ))}
-      <span className="ml-2 text-xs text-muted-foreground">{restaurant.rating?.toFixed(1) || '4.0'}</span>
-    </div>
-    <div className="text-sm text-muted-foreground line-clamp-2">{restaurant.description}</div>
-    <div className="flex items-center justify-between mt-auto">
-      <span className="font-bold text-primary">{restaurant.price} MAD</span>
-      <Button size="sm" className="bg-primary text-white hover:bg-primary/90">Voir</Button>
-    </div>
-  </div>
-);
+  );
+};
 
 const Restaurants = () => {
   const { data: restaurants = [] } = useQuery({
