@@ -42,6 +42,7 @@ import Reservations from './pages/admin/Reservations';
 import ManageReviews from './pages/admin/ManageReviews';
 import ReservationEventPage from './pages/reservation-event';
 import RestaurantDetail from './pages/RestaurantDetail'
+import NotificationsPage from './pages/Notifications';
 
 const queryClient = new QueryClient();
 
@@ -185,6 +186,14 @@ const App = () => (
                     element={
                       <ProtectedRoute>
                         <PaymentFailed />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <ProtectedRoute>
+                        <NotificationsPage />
                       </ProtectedRoute>
                     }
                   />
