@@ -41,6 +41,7 @@ import LeaveReviewPage from './pages/LeaveReviewPage';
 import Reservations from './pages/admin/Reservations';
 import ManageReviews from './pages/admin/ManageReviews';
 import ReservationEventPage from './pages/reservation-event';
+import RestaurantDetail from './pages/RestaurantDetail'
 
 const queryClient = new QueryClient();
 
@@ -83,6 +84,14 @@ const App = () => (
                     element={
                       <ProtectedRoute>
                         <Restaurants />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/restaurants/:id"
+                    element={
+                      <ProtectedRoute>
+                        <RestaurantDetail />
                       </ProtectedRoute>
                     }
                   />

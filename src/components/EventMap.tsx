@@ -3,6 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { Event } from '../services/eventService';
 import { useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Créer une icône bleue uniforme pour tous les événements
 const createEventIcon = () => {
@@ -144,6 +145,8 @@ export default function EventMap({ events, restaurants = [], selectedItem, onSel
     }
   }, [selectedItem]);
 
+  const navigate = useNavigate();
+
   return (
     <MapContainer center={center} zoom={zoom} style={{ height: '500px', width: '100%' }}>
       <MapEffect selectedItem={selectedItem} />
@@ -178,7 +181,7 @@ export default function EventMap({ events, restaurants = [], selectedItem, onSel
                   <div><strong>Prix:</strong> {event.price} MAD</div>
                 </div>
                 <button 
-                  onClick={() => onSelect(event)} 
+                  onClick={() => navigate(`/events/${event._id}`)} 
                   style={{
                     backgroundColor: '#3498db',
                     color: 'white',
@@ -227,7 +230,7 @@ export default function EventMap({ events, restaurants = [], selectedItem, onSel
                   <div><strong>Prix:</strong> {restaurant.price} MAD</div>
                 </div>
                 <button 
-                  onClick={() => onSelect(restaurant)} 
+                  onClick={() => navigate(`/restaurants/${restaurant._id}`)} 
                   style={{
                     backgroundColor: '#e67e22',
                     color: 'white',

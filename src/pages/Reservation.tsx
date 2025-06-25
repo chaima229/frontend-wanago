@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useReservation } from '../contexts/ReservationContext';
 import { useAuth } from '../contexts/AuthContext';
 import { ReservationService } from '../services/reservationService';
@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DatePicker from '@/components/DatePicker';
+import { RestaurantService } from '../services/restaurantService';
 
 const Reservation = () => {
   const navigate = useNavigate();
@@ -16,10 +17,20 @@ const Reservation = () => {
   const { reservationData, updateReservation } = useReservation();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
   
   useEffect(() => {
     console.log('Reservation data updated:', reservationData);
   }, [reservationData]);
+  
+  useEffect(() => {
+    const restaurantId = searchParams.get('restaurantId');
+    if (restaurantId && (!reservationData.restaurant || reservationData.restaurant.id !== restaurantId)) {
+      RestaurantService.getRestaurantById(restaurantId).then(resto => {
+        updateReservation({ restaurant: { ...resto, id: resto._id } });
+      });
+    }
+  }, [searchParams, reservationData.restaurant, updateReservation]);
   
   const [customerInfo, setCustomerInfo] = useState({
     fullName: user?.fullName || '',
